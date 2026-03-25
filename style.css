@@ -88,6 +88,12 @@ section {
   font-size: 2.5rem;
   line-height: 1.1;
   letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.tagline {
+  font-size: 1.05rem;
+  color: #555;
   margin-bottom: 1.25rem;
 }
 
