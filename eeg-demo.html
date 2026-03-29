@@ -167,57 +167,6 @@
       text-align: right;
     }
 
-    /* gallery grid */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .gallery-item {
-      background: #fff;
-      border: 1px solid #e5e2dc;
-      border-radius: 6px;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-2px);
-    }
-
-    .gallery-images {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .gallery-images img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-    }
-
-    .gallery-footer {
-      padding: 0.6rem 0.75rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .gallery-name {
-      font-size: 0.8rem;
-      color: #666;
-      text-transform: capitalize;
-    }
-
-    .gallery-score {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #444;
-      font-variant-numeric: tabular-nums;
-    }
-
     /* stats row */
     .stats-row {
       display: flex;
@@ -292,10 +241,6 @@
 
       .stats-row {
         gap: 0.75rem;
-      }
-
-      .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       }
     }
   </style>
@@ -418,16 +363,6 @@
           <span class="score-value" id="scoreValue">0.000</span>
         </div>
       </div>
-
-      <h2>Gallery</h2>
-      <p>Top reconstructions, ranked by CLIP similarity.</p>
-      <div class="gallery-grid" id="gallery"></div>
-
-      <h2>Links</h2>
-      <ul>
-        <li><a href="https://github.com/aaronjj908/eeg-demo">GitHub repo</a></li>
-        <li><a href="https://arxiv.org/abs/2403.07721">Paper (arXiv)</a></li>
-      </ul>
 
     </section>
 
@@ -657,24 +592,6 @@
       btn.textContent = s.cat;
       btn.onclick = () => showSample(i);
       nav.appendChild(btn);
-    });
-
-    // ---- Build gallery ----
-    const gallery = document.getElementById("gallery");
-    samples.forEach((s) => {
-      const card = document.createElement("div");
-      card.className = "gallery-item";
-      card.innerHTML = `
-        <div class="gallery-images">
-          <img src="${REPO}/${s.reconFile}" alt="${s.cat} reconstruction" loading="lazy">
-          <img src="${REPO}/${s.gtFile}" alt="${s.cat} ground truth" loading="lazy">
-        </div>
-        <div class="gallery-footer">
-          <span class="gallery-name">${s.cat}</span>
-          <span class="gallery-score">${s.score.toFixed(3)}</span>
-        </div>
-      `;
-      gallery.appendChild(card);
     });
 
     // ---- Init ----
