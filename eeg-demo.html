@@ -438,30 +438,30 @@
   </footer>
 
   <script>
-    // ---- Sample data (top 20 ranked results from evaluation) ----
-    const REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_best";
+    // ---- Sample data (top1 reconstructions from top50_1000) ----
+    const REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000";
 
     const samples = [
-      { rank: 1,  idx: "001", cat: "antelope",     score: 0.730, gtFile: "rank01_001_00002_antelope_GT.png",       reconFile: "rank01_001_00002_antelope_clip0.730.png" },
-      { rank: 2,  idx: "147", cat: "raspberry",     score: 0.745, gtFile: "rank02_147_00148_raspberry_GT.png",     reconFile: "rank02_147_00148_raspberry_clip0.745.png" },
-      { rank: 3,  idx: "011", cat: "beaver",        score: 0.705, gtFile: "rank03_011_00012_beaver_GT.png",        reconFile: "rank03_011_00012_beaver_clip0.705.png" },
-      { rank: 4,  idx: "160", cat: "seagull",       score: 0.664, gtFile: "rank04_160_00161_seagull_GT.png",       reconFile: "rank04_160_00161_seagull_clip0.664.png" },
-      { rank: 5,  idx: "086", cat: "gopher",        score: 0.734, gtFile: "rank05_086_00087_gopher_GT.png",        reconFile: "rank05_086_00087_gopher_clip0.734.png" },
-      { rank: 6,  idx: "038", cat: "cheetah",       score: 0.691, gtFile: "rank06_038_00039_cheetah_GT.png",       reconFile: "rank06_038_00039_cheetah_clip0.691.png" },
-      { rank: 7,  idx: "124", cat: "orange",        score: 0.751, gtFile: "rank07_124_00125_orange_GT.png",        reconFile: "rank07_124_00125_orange_clip0.751.png" },
-      { rank: 8,  idx: "130", cat: "pear",          score: 0.713, gtFile: "rank08_130_00131_pear_GT.png",          reconFile: "rank08_130_00131_pear_clip0.713.png" },
-      { rank: 9,  idx: "100", cat: "jelly bean",    score: 0.677, gtFile: "rank09_100_00101_jelly_bean_GT.png",    reconFile: "rank09_100_00101_jelly_bean_clip0.677.png" },
-      { rank: 10, idx: "037", cat: "cheese",        score: 0.700, gtFile: "rank10_037_00038_cheese_GT.png",        reconFile: "rank10_037_00038_cheese_clip0.700.png" },
-      { rank: 11, idx: "141", cat: "possum",        score: 0.733, gtFile: "rank11_141_00142_possum_GT.png",        reconFile: "rank11_141_00142_possum_clip0.733.png" },
-      { rank: 12, idx: "169", cat: "spatula",       score: 0.681, gtFile: "rank12_169_00170_spatula_GT.png",       reconFile: "rank12_169_00170_spatula_clip0.681.png" },
-      { rank: 13, idx: "057", cat: "crow",          score: 0.698, gtFile: "rank13_057_00058_crow_GT.png",          reconFile: "rank13_057_00058_crow_clip0.698.png" },
-      { rank: 14, idx: "109", cat: "lightning bug", score: 0.618, gtFile: "rank14_109_00110_lightning_bug_GT.png", reconFile: "rank14_109_00110_lightning_bug_clip0.618.png" },
-      { rank: 15, idx: "030", cat: "cart",          score: 0.633, gtFile: "rank15_030_00031_cart_GT.png",          reconFile: "rank15_030_00031_cart_clip0.633.png" },
-      { rank: 16, idx: "080", cat: "fruit",         score: 0.546, gtFile: "rank16_080_00081_fruit_GT.png",         reconFile: "rank16_080_00081_fruit_clip0.546.png" },
-      { rank: 17, idx: "010", cat: "batter",        score: 0.682, gtFile: "rank17_010_00011_batter_GT.png",        reconFile: "rank17_010_00011_batter_clip0.682.png" },
-      { rank: 18, idx: "128", cat: "panther",       score: 0.628, gtFile: "rank18_128_00129_panther_GT.png",       reconFile: "rank18_128_00129_panther_clip0.628.png" },
-      { rank: 19, idx: "110", cat: "manatee",       score: 0.604, gtFile: "rank19_110_00111_manatee_GT.png",       reconFile: "rank19_110_00111_manatee_clip0.604.png" },
-      { rank: 20, idx: "132", cat: "pheasant",      score: 0.610, gtFile: "rank20_132_00133_pheasant_GT.png",      reconFile: "rank20_132_00133_pheasant_clip0.610.png" },
+      { idx: "124", cat: "orange",        score: 0.797, gtFile: "idx124_orange_GT.png",        reconFile: "idx124_orange_top1_clip0.797_sub-04.png" },
+      { idx: "151", cat: "rooster",       score: 0.794, gtFile: "idx151_rooster_GT.png",       reconFile: "idx151_rooster_top1_clip0.794_sub-01.png" },
+      { idx: "086", cat: "gopher",        score: 0.776, gtFile: "idx086_gopher_GT.png",        reconFile: "idx086_gopher_top1_clip0.776_sub-09.png" },
+      { idx: "011", cat: "beaver",        score: 0.757, gtFile: "idx011_beaver_GT.png",        reconFile: "idx011_beaver_top1_clip0.757_sub-05.png" },
+      { idx: "147", cat: "raspberry",     score: 0.752, gtFile: "idx147_raspberry_GT.png",     reconFile: "idx147_raspberry_top1_clip0.752_sub-08.png" },
+      { idx: "100", cat: "jelly bean",    score: 0.743, gtFile: "idx100_jelly_bean_GT.png",    reconFile: "idx100_jelly_bean_top1_clip0.743_sub-03.png" },
+      { idx: "001", cat: "antelope",      score: 0.743, gtFile: "idx001_antelope_GT.png",      reconFile: "idx001_antelope_top1_clip0.743_sub-09.png" },
+      { idx: "141", cat: "possum",        score: 0.742, gtFile: "idx141_possum_GT.png",        reconFile: "idx141_possum_top1_clip0.742_sub-04.png" },
+      { idx: "057", cat: "crow",          score: 0.731, gtFile: "idx057_crow_GT.png",          reconFile: "idx057_crow_top1_clip0.731_sub-01.png" },
+      { idx: "105", cat: "lamb",          score: 0.729, gtFile: "idx105_lamb_GT.png",          reconFile: "idx105_lamb_top1_clip0.729_sub-01.png" },
+      { idx: "062", cat: "dalmatian",     score: 0.713, gtFile: "idx062_dalmatian_GT.png",     reconFile: "idx062_dalmatian_top1_clip0.713_sub-04.png" },
+      { idx: "108", cat: "lettuce",       score: 0.706, gtFile: "idx108_lettuce_GT.png",       reconFile: "idx108_lettuce_top1_clip0.706_sub-03.png" },
+      { idx: "160", cat: "seagull",       score: 0.702, gtFile: "idx160_seagull_GT.png",       reconFile: "idx160_seagull_top1_clip0.702_sub-04.png" },
+      { idx: "156", cat: "sausage",       score: 0.697, gtFile: "idx156_sausage_GT.png",       reconFile: "idx156_sausage_top1_clip0.697_sub-03.png" },
+      { idx: "130", cat: "pear",          score: 0.693, gtFile: "idx130_pear_GT.png",          reconFile: "idx130_pear_top1_clip0.693_sub-04.png" },
+      { idx: "045", cat: "cobra",         score: 0.686, gtFile: "idx045_cobra_GT.png",         reconFile: "idx045_cobra_top1_clip0.686_sub-08.png" },
+      { idx: "025", cat: "bullet",        score: 0.684, gtFile: "idx025_bullet_GT.png",        reconFile: "idx025_bullet_top1_clip0.684_sub-03.png" },
+      { idx: "010", cat: "batter",        score: 0.679, gtFile: "idx010_batter_GT.png",        reconFile: "idx010_batter_top1_clip0.679_sub-04.png" },
+      { idx: "037", cat: "cheese",        score: 0.679, gtFile: "idx037_cheese_GT.png",        reconFile: "idx037_cheese_top1_clip0.679_sub-10.png" },
+      { idx: "038", cat: "cheetah",       score: 0.679, gtFile: "idx038_cheetah_GT.png",       reconFile: "idx038_cheetah_top1_clip0.679_sub-05.png" },
     ];
 
     let currentSample = 0;
