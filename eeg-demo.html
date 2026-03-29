@@ -117,6 +117,8 @@
       object-fit: contain;
       border-radius: 4px;
       background: #fff;
+      max-height: 320px;
+      margin: 0 auto;
     }
 
     /* score bar */
@@ -380,7 +382,7 @@
       { idx: "038", cat: "cheetah",       score: 0.679, gtFile: "idx038_cheetah_GT.png",       reconFile: "idx038_cheetah_top1_clip0.679_sub-05.png" },
     ];
 
-    const BRAINWAVE_REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/brainwaves";
+    const BRAINWAVE_REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/topoplots";
 
     let currentSample = 0;
 
@@ -396,7 +398,7 @@
       currentSample = index;
       const s = samples[index];
 
-      document.getElementById("brainwave").src = `${BRAINWAVE_REPO}/brainwave_${s.idx}.png`;
+      document.getElementById("brainwave").src = `${BRAINWAVE_REPO}/topo_${s.idx}.gif`;
       document.getElementById("recon").src = `${REPO}/${s.reconFile}`;
       document.getElementById("gt").src = `${REPO}/${s.gtFile}`;
 
