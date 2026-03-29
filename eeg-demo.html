@@ -9,226 +9,49 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ---- eeg demo styles ---- */
+    main { max-width: 960px; }
+    .eeg-intro { max-width: 560px; margin-bottom: 1.5rem; }
+    .eeg-intro p { font-size: 1rem; color: #444; margin-bottom: 0.85rem; }
+    .pipeline-label { font-family: "DM Sans", system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 0.5rem; }
+    .sample-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .sample-btn { background: none; border: 1px solid #ddd; border-radius: 100px; padding: 0.35rem 0.85rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.82rem; color: #666; cursor: pointer; transition: all 0.2s; }
+    .sample-btn:hover { border-color: #aaa; color: #222; }
+    .sample-btn.active { background: #222; border-color: #222; color: #fff; }
+    .demo-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .demo-pipeline { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1rem; align-items: start; }
+    .demo-step { text-align: center; }
+    .demo-step .pipeline-label { margin-bottom: 0.6rem; }
+    .demo-step img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: #e5e2dc; }
+    .brain-canvas { width: 100%; height: 260px; display: block; border-radius: 4px; }
+    .score-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
+    .score-label { font-size: 0.8rem; font-weight: 500; color: #888; white-space: nowrap; }
+    .score-bar-bg { flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .score-value { font-size: 0.85rem; font-weight: 600; color: #222; font-variant-numeric: tabular-nums; min-width: 3rem; text-align: right; }
+    .stats-row { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; padding: 1rem 1.25rem; flex: 1; min-width: 140px; }
+    .stat-number { font-family: "Instrument Serif", Georgia, serif; font-size: 1.75rem; color: #222; line-height: 1.2; }
+    .stat-desc { font-size: 0.8rem; color: #888; margin-top: 0.15rem; }
+    .pipeline-diagram { display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0 1.5rem; flex-wrap: wrap; }
+    .pipeline-node { background: #fff; border: 1px solid #e5e2dc; border-radius: 6px; padding: 0.5rem 0.85rem; font-size: 0.82rem; color: #444; font-weight: 500; }
+    .pipeline-arrow { color: #ccc; font-size: 0.85rem; }
 
-    /* widen main for the demo page */
-    main {
-      max-width: 960px;
-    }
+    /* Explorer section */
+    .explorer-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; overflow: hidden; }
+    .explorer-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 360px; }
+    .explorer-head { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #eee; }
+    .explorer-head svg { width: 100%; max-width: 240px; }
+    .explorer-legend { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; justify-content: center; }
+    .legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; color: #888; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .explorer-wave { background: #1a1a2e; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; justify-content: center; }
+    .explorer-wave-label { color: rgba(255,255,255,0.5); font-family: "DM Sans", system-ui, sans-serif; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.75rem; }
+    .explorer-wave-sub { color: rgba(255,255,255,0.2); font-size: 0.7rem; margin-top: 0.5rem; }
+    .electrode-dot { cursor: pointer; transition: all 0.15s; }
+    .electrode-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 6px; fill: #bbb; pointer-events: none; text-anchor: middle; }
 
-    .eeg-intro {
-      max-width: 560px;
-      margin-bottom: 1.5rem;
-    }
-
-    .eeg-intro p {
-      font-size: 1rem;
-      color: #444;
-      margin-bottom: 0.85rem;
-    }
-
-    /* pipeline steps */
-    .pipeline-label {
-      font-family: "DM Sans", system-ui, sans-serif;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #888;
-      margin-bottom: 0.5rem;
-    }
-
-    .pipeline-steps {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .pipeline-steps li {
-      font-size: 0.9rem;
-      color: #444;
-    }
-
-    /* sample selector */
-    .sample-nav {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-
-    .sample-btn {
-      background: none;
-      border: 1px solid #ddd;
-      border-radius: 100px;
-      padding: 0.35rem 0.85rem;
-      font-family: "DM Sans", system-ui, sans-serif;
-      font-size: 0.82rem;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .sample-btn:hover {
-      border-color: #aaa;
-      color: #222;
-    }
-
-    .sample-btn.active {
-      background: #222;
-      border-color: #222;
-      color: #fff;
-    }
-
-    /* demo card — break out of narrow main */
-    .demo-card {
-      background: #fff;
-      border: 1px solid #e5e2dc;
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .demo-pipeline {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
-      gap: 1rem;
-      align-items: start;
-    }
-
-    .demo-step {
-      text-align: center;
-    }
-
-    .demo-step .pipeline-label {
-      margin-bottom: 0.6rem;
-    }
-
-    .demo-step img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      border-radius: 4px;
-      background: #e5e2dc;
-    }
-
-    .demo-step.brainwave-step img {
-      aspect-ratio: auto;
-      object-fit: contain;
-      border-radius: 4px;
-      background: #fff;
-      max-height: 320px;
-      margin: 0 auto;
-    }
-
-    /* score bar */
-    .score-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #eee;
-    }
-
-    .score-label {
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #888;
-      white-space: nowrap;
-    }
-
-    .score-bar-bg {
-      flex: 1;
-      height: 6px;
-      background: #eee;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .score-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.5s ease;
-    }
-
-    .score-value {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #222;
-      font-variant-numeric: tabular-nums;
-      min-width: 3rem;
-      text-align: right;
-    }
-
-    /* stats row */
-    .stats-row {
-      display: flex;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .stat-card {
-      background: #fff;
-      border: 1px solid #e5e2dc;
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .stat-number {
-      font-family: "Instrument Serif", Georgia, serif;
-      font-size: 1.75rem;
-      color: #222;
-      line-height: 1.2;
-    }
-
-    .stat-desc {
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 0.15rem;
-    }
-
-    /* how it works diagram */
-    .pipeline-diagram {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 1rem 0 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .pipeline-node {
-      background: #fff;
-      border: 1px solid #e5e2dc;
-      border-radius: 6px;
-      padding: 0.5rem 0.85rem;
-      font-size: 0.82rem;
-      color: #444;
-      font-weight: 500;
-    }
-
-    .pipeline-arrow {
-      color: #ccc;
-      font-size: 0.85rem;
-    }
-
-    @media (max-width: 600px) {
-      .demo-pipeline {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-      }
-
-      .brainwave-container {
-        aspect-ratio: 16/9;
-      }
-
-      .stats-row {
-        gap: 0.75rem;
-      }
-    }
+    @media (max-width: 700px) { .explorer-layout { grid-template-columns: 1fr; } .explorer-head { border-right: none; border-bottom: 1px solid #eee; } }
+    @media (max-width: 600px) { .demo-pipeline { grid-template-columns: 1fr; gap: 1.25rem; } .stats-row { gap: 0.75rem; } }
   </style>
 </head>
 <body>
@@ -242,33 +65,20 @@
   </header>
 
   <main>
-
     <section class="project-header">
       <h1>Visual Reconstruction from EEG</h1>
-      <p class="project-subtitle">
-        Decoding what someone sees from their brain activity, using deep learning.
-      </p>
+      <p class="project-subtitle">Decoding what someone sees from their brain activity, using deep learning.</p>
     </section>
 
     <hr>
 
     <section class="project-body">
-
       <div class="eeg-intro">
-        <p>
-          This project reconstructs images from EEG brain signals. A subject views
-          an image while wearing an EEG cap, and a two-pathway neural network
-          decodes the brain activity into a visual reconstruction &mdash; all from
-          less than 500ms of signal.
-        </p>
+        <p>This project reconstructs images from EEG brain signals. A subject views an image while wearing an EEG cap, and a two-pathway neural network decodes the brain activity into a visual reconstruction &mdash; all from less than 500ms of signal.</p>
       </div>
 
       <h2>How it works</h2>
-      <p>
-        The system uses two complementary pathways to go from raw EEG to an
-        image:
-      </p>
-
+      <p>The system uses two complementary pathways to go from raw EEG to an image:</p>
       <div class="pipeline-diagram">
         <span class="pipeline-node">EEG Signal</span>
         <span class="pipeline-arrow">&rarr;</span>
@@ -280,54 +90,30 @@
         <span class="pipeline-arrow">&rarr;</span>
         <span class="pipeline-node">Reconstruction</span>
       </div>
-
       <ol>
-        <li><strong>EEG Recording</strong> &mdash; Brain activity is captured from
-          occipital and parieto-occipital electrodes (O1, Oz, O2, PO3, PO4, PO7, PO8)
-          positioned over the visual cortex.</li>
-        <li><strong>Semantic Pathway</strong> &mdash; Maps EEG embeddings into
-          CLIP embedding space, capturing high-level meaning (what the object is).</li>
-        <li><strong>Diffusion Prior</strong> &mdash; Translates the predicted
-          embeddings into image space via Stable Diffusion, producing the final
-          reconstruction.</li>
+        <li><strong>EEG Recording</strong> &mdash; Brain activity is captured from 63 electrodes across the scalp using a BrainVision actiCHamp system.</li>
+        <li><strong>Semantic Pathway</strong> &mdash; Maps EEG embeddings into CLIP embedding space, capturing high-level meaning (what the object is).</li>
+        <li><strong>Diffusion Prior</strong> &mdash; Translates the predicted embeddings into image space via Stable Diffusion, producing the final reconstruction.</li>
       </ol>
 
       <h2>Results</h2>
-
       <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-number">0.49</div>
-          <div class="stat-desc">Avg. CLIP similarity</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">0.75</div>
-          <div class="stat-desc">Best score</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">200</div>
-          <div class="stat-desc">Test images</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">&lt;500ms</div>
-          <div class="stat-desc">Signal window</div>
-        </div>
+        <div class="stat-card"><div class="stat-number">0.49</div><div class="stat-desc">Avg. CLIP similarity</div></div>
+        <div class="stat-card"><div class="stat-number">0.75</div><div class="stat-desc">Best score</div></div>
+        <div class="stat-card"><div class="stat-number">200</div><div class="stat-desc">Test images</div></div>
+        <div class="stat-card"><div class="stat-number">&lt;500ms</div><div class="stat-desc">Signal window</div></div>
       </div>
 
       <h2>Demo</h2>
-      <p>
-        Select a sample below to see the EEG brain activity, the AI
-        reconstruction, and the ground truth image the subject was viewing.
-        The CLIP similarity score measures how semantically close the
-        reconstruction is to the original.
-      </p>
+      <p>Select a sample below to watch the brain response unfold. The visual cortex waveform replays in slow motion as the subject views the image.</p>
 
       <div class="sample-nav" id="sampleNav"></div>
 
       <div class="demo-card">
         <div class="demo-pipeline">
-          <div class="demo-step brainwave-step">
-            <div class="pipeline-label">Brain Activity</div>
-            <img id="brainwave" src="" alt="EEG brain waves">
+          <div class="demo-step">
+            <div class="pipeline-label">Brain Activity &mdash; Visual Cortex &mdash; <span id="playback-time">0 ms</span></div>
+            <canvas class="brain-canvas" id="eegCanvas"></canvas>
           </div>
           <div class="demo-step">
             <div class="pipeline-label">AI Reconstruction</div>
@@ -340,15 +126,36 @@
         </div>
         <div class="score-row">
           <span class="score-label">CLIP Similarity</span>
-          <div class="score-bar-bg">
-            <div class="score-bar-fill" id="scoreBar"></div>
-          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="scoreBar"></div></div>
           <span class="score-value" id="scoreValue">0.000</span>
         </div>
       </div>
 
-    </section>
+      <h2>Explore the Full Brain Response</h2>
+      <p>The model uses all 63 EEG channels as input. Click any electrode on the head map to see that channel's recorded signal.</p>
 
+      <div class="explorer-card">
+        <div class="explorer-layout">
+          <div class="explorer-head">
+            <svg viewBox="0 0 300 320" id="headSvg"></svg>
+            <div class="explorer-legend">
+              <div class="legend-item"><span class="legend-dot" style="background:#ffcc56"></span>Visual Cortex</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#88bbdd"></span>Parietal</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#88aacc"></span>Centro-Parietal</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#aa99cc"></span>Central-Temporal</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#bb8899"></span>Frontal-Central</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#cc9988"></span>Frontal</div>
+            </div>
+          </div>
+          <div class="explorer-wave">
+            <div class="explorer-wave-label" id="explorerLabel">Oz &mdash; Visual Cortex</div>
+            <canvas id="explorerCanvas" style="width:100%;height:240px;"></canvas>
+            <div class="explorer-wave-sub">800ms recording &mdash; click any electrode to explore</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
   </main>
 
   <footer>
@@ -356,77 +163,180 @@
   </footer>
 
   <script>
-    // ---- Sample data (top1 reconstructions from top50_1000) ----
+    // ===== Sample data =====
     const REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000";
-
     const samples = [
-      { idx: "124", cat: "orange",        score: 0.797, gtFile: "idx124_orange_GT.png",        reconFile: "idx124_orange_top1_clip0.797_sub-04.png" },
-      { idx: "151", cat: "rooster",       score: 0.794, gtFile: "idx151_rooster_GT.png",       reconFile: "idx151_rooster_top1_clip0.794_sub-01.png" },
-      { idx: "086", cat: "gopher",        score: 0.776, gtFile: "idx086_gopher_GT.png",        reconFile: "idx086_gopher_top1_clip0.776_sub-09.png" },
-      { idx: "011", cat: "beaver",        score: 0.757, gtFile: "idx011_beaver_GT.png",        reconFile: "idx011_beaver_top1_clip0.757_sub-05.png" },
-      { idx: "147", cat: "raspberry",     score: 0.752, gtFile: "idx147_raspberry_GT.png",     reconFile: "idx147_raspberry_top1_clip0.752_sub-08.png" },
-      { idx: "100", cat: "jelly bean",    score: 0.743, gtFile: "idx100_jelly_bean_GT.png",    reconFile: "idx100_jelly_bean_top1_clip0.743_sub-03.png" },
-      { idx: "001", cat: "antelope",      score: 0.743, gtFile: "idx001_antelope_GT.png",      reconFile: "idx001_antelope_top1_clip0.743_sub-09.png" },
-      { idx: "141", cat: "possum",        score: 0.742, gtFile: "idx141_possum_GT.png",        reconFile: "idx141_possum_top1_clip0.742_sub-04.png" },
-      { idx: "057", cat: "crow",          score: 0.731, gtFile: "idx057_crow_GT.png",          reconFile: "idx057_crow_top1_clip0.731_sub-01.png" },
-      { idx: "105", cat: "lamb",          score: 0.729, gtFile: "idx105_lamb_GT.png",          reconFile: "idx105_lamb_top1_clip0.729_sub-01.png" },
-      { idx: "062", cat: "dalmatian",     score: 0.713, gtFile: "idx062_dalmatian_GT.png",     reconFile: "idx062_dalmatian_top1_clip0.713_sub-04.png" },
-      { idx: "108", cat: "lettuce",       score: 0.706, gtFile: "idx108_lettuce_GT.png",       reconFile: "idx108_lettuce_top1_clip0.706_sub-03.png" },
-      { idx: "160", cat: "seagull",       score: 0.702, gtFile: "idx160_seagull_GT.png",       reconFile: "idx160_seagull_top1_clip0.702_sub-04.png" },
-      { idx: "156", cat: "sausage",       score: 0.697, gtFile: "idx156_sausage_GT.png",       reconFile: "idx156_sausage_top1_clip0.697_sub-03.png" },
-      { idx: "130", cat: "pear",          score: 0.693, gtFile: "idx130_pear_GT.png",          reconFile: "idx130_pear_top1_clip0.693_sub-04.png" },
-      { idx: "045", cat: "cobra",         score: 0.686, gtFile: "idx045_cobra_GT.png",         reconFile: "idx045_cobra_top1_clip0.686_sub-08.png" },
-      { idx: "025", cat: "bullet",        score: 0.684, gtFile: "idx025_bullet_GT.png",        reconFile: "idx025_bullet_top1_clip0.684_sub-03.png" },
-      { idx: "010", cat: "batter",        score: 0.679, gtFile: "idx010_batter_GT.png",        reconFile: "idx010_batter_top1_clip0.679_sub-04.png" },
-      { idx: "037", cat: "cheese",        score: 0.679, gtFile: "idx037_cheese_GT.png",        reconFile: "idx037_cheese_top1_clip0.679_sub-10.png" },
-      { idx: "038", cat: "cheetah",       score: 0.679, gtFile: "idx038_cheetah_GT.png",       reconFile: "idx038_cheetah_top1_clip0.679_sub-05.png" },
+      { idx:"124", cat:"orange",     score:0.797, gtFile:"idx124_orange_GT.png",     reconFile:"idx124_orange_top1_clip0.797_sub-04.png" },
+      { idx:"151", cat:"rooster",    score:0.794, gtFile:"idx151_rooster_GT.png",    reconFile:"idx151_rooster_top1_clip0.794_sub-01.png" },
+      { idx:"086", cat:"gopher",     score:0.776, gtFile:"idx086_gopher_GT.png",     reconFile:"idx086_gopher_top1_clip0.776_sub-09.png" },
+      { idx:"011", cat:"beaver",     score:0.757, gtFile:"idx011_beaver_GT.png",     reconFile:"idx011_beaver_top1_clip0.757_sub-05.png" },
+      { idx:"147", cat:"raspberry",  score:0.752, gtFile:"idx147_raspberry_GT.png",  reconFile:"idx147_raspberry_top1_clip0.752_sub-08.png" },
+      { idx:"100", cat:"jelly bean", score:0.743, gtFile:"idx100_jelly_bean_GT.png", reconFile:"idx100_jelly_bean_top1_clip0.743_sub-03.png" },
+      { idx:"001", cat:"antelope",   score:0.743, gtFile:"idx001_antelope_GT.png",   reconFile:"idx001_antelope_top1_clip0.743_sub-09.png" },
+      { idx:"141", cat:"possum",     score:0.742, gtFile:"idx141_possum_GT.png",     reconFile:"idx141_possum_top1_clip0.742_sub-04.png" },
+      { idx:"057", cat:"crow",       score:0.731, gtFile:"idx057_crow_GT.png",       reconFile:"idx057_crow_top1_clip0.731_sub-01.png" },
+      { idx:"105", cat:"lamb",       score:0.729, gtFile:"idx105_lamb_GT.png",       reconFile:"idx105_lamb_top1_clip0.729_sub-01.png" },
+      { idx:"062", cat:"dalmatian",  score:0.713, gtFile:"idx062_dalmatian_GT.png",  reconFile:"idx062_dalmatian_top1_clip0.713_sub-04.png" },
+      { idx:"108", cat:"lettuce",    score:0.706, gtFile:"idx108_lettuce_GT.png",    reconFile:"idx108_lettuce_top1_clip0.706_sub-03.png" },
+      { idx:"160", cat:"seagull",    score:0.702, gtFile:"idx160_seagull_GT.png",    reconFile:"idx160_seagull_top1_clip0.702_sub-04.png" },
+      { idx:"156", cat:"sausage",    score:0.697, gtFile:"idx156_sausage_GT.png",    reconFile:"idx156_sausage_top1_clip0.697_sub-03.png" },
+      { idx:"130", cat:"pear",       score:0.693, gtFile:"idx130_pear_GT.png",       reconFile:"idx130_pear_top1_clip0.693_sub-04.png" },
+      { idx:"045", cat:"cobra",      score:0.686, gtFile:"idx045_cobra_GT.png",      reconFile:"idx045_cobra_top1_clip0.686_sub-08.png" },
+      { idx:"025", cat:"bullet",     score:0.684, gtFile:"idx025_bullet_GT.png",     reconFile:"idx025_bullet_top1_clip0.684_sub-03.png" },
+      { idx:"010", cat:"batter",     score:0.679, gtFile:"idx010_batter_GT.png",     reconFile:"idx010_batter_top1_clip0.679_sub-04.png" },
+      { idx:"037", cat:"cheese",     score:0.679, gtFile:"idx037_cheese_GT.png",     reconFile:"idx037_cheese_top1_clip0.679_sub-10.png" },
+      { idx:"038", cat:"cheetah",    score:0.679, gtFile:"idx038_cheetah_GT.png",    reconFile:"idx038_cheetah_top1_clip0.679_sub-05.png" },
     ];
 
-    const BRAINWAVE_REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/topoplots";
+    // ===== All 63 channels =====
+    const ALL_CH = [
+      {n:"Fp1",x:120,y:42,r:"Frontal"},{n:"Fp2",x:180,y:42,r:"Frontal"},
+      {n:"AF7",x:80,y:60,r:"Frontal"},{n:"AF3",x:125,y:58,r:"Frontal"},{n:"AFz",x:150,y:55,r:"Frontal"},{n:"AF4",x:175,y:58,r:"Frontal"},{n:"AF8",x:220,y:60,r:"Frontal"},
+      {n:"F7",x:60,y:90,r:"Frontal"},{n:"F5",x:85,y:88,r:"Frontal"},{n:"F3",x:110,y:86,r:"Frontal"},{n:"F1",x:135,y:84,r:"Frontal"},{n:"F2",x:165,y:84,r:"Frontal"},{n:"F4",x:190,y:86,r:"Frontal"},{n:"F6",x:215,y:88,r:"Frontal"},{n:"F8",x:240,y:90,r:"Frontal"},
+      {n:"FT9",x:35,y:115,r:"Frontal-Central"},{n:"FT7",x:50,y:112,r:"Frontal-Central"},{n:"FC5",x:75,y:118,r:"Frontal-Central"},{n:"FC3",x:105,y:120,r:"Frontal-Central"},{n:"FC1",x:132,y:122,r:"Frontal-Central"},{n:"FCz",x:150,y:120,r:"Frontal-Central"},{n:"FC2",x:168,y:122,r:"Frontal-Central"},{n:"FC4",x:195,y:120,r:"Frontal-Central"},{n:"FC6",x:225,y:118,r:"Frontal-Central"},{n:"FT8",x:250,y:112,r:"Frontal-Central"},{n:"FT10",x:265,y:115,r:"Frontal-Central"},
+      {n:"T7",x:38,y:155,r:"Central-Temporal"},{n:"C5",x:70,y:152,r:"Central-Temporal"},{n:"C3",x:100,y:150,r:"Central-Temporal"},{n:"C1",x:130,y:148,r:"Central-Temporal"},{n:"Cz",x:150,y:147,r:"Central-Temporal"},{n:"C2",x:170,y:148,r:"Central-Temporal"},{n:"C4",x:200,y:150,r:"Central-Temporal"},{n:"C6",x:230,y:152,r:"Central-Temporal"},{n:"T8",x:262,y:155,r:"Central-Temporal"},
+      {n:"TP9",x:35,y:190,r:"Centro-Parietal"},{n:"TP7",x:50,y:188,r:"Centro-Parietal"},{n:"CP5",x:78,y:190,r:"Centro-Parietal"},{n:"CP3",x:108,y:192,r:"Centro-Parietal"},{n:"CP1",x:133,y:193,r:"Centro-Parietal"},{n:"CPz",x:150,y:192,r:"Centro-Parietal"},{n:"CP2",x:167,y:193,r:"Centro-Parietal"},{n:"CP4",x:192,y:192,r:"Centro-Parietal"},{n:"CP6",x:222,y:190,r:"Centro-Parietal"},{n:"TP8",x:250,y:188,r:"Centro-Parietal"},{n:"TP10",x:265,y:190,r:"Centro-Parietal"},
+      {n:"P7",x:65,y:220,r:"Parietal"},{n:"P5",x:88,y:218,r:"Parietal"},{n:"P3",x:112,y:215,r:"Parietal"},{n:"P1",x:135,y:213,r:"Parietal"},{n:"Pz",x:150,y:212,r:"Parietal"},{n:"P2",x:165,y:213,r:"Parietal"},{n:"P4",x:188,y:215,r:"Parietal"},{n:"P6",x:212,y:218,r:"Parietal"},{n:"P8",x:235,y:220,r:"Parietal"},
+      {n:"PO7",x:88,y:248,r:"Visual Cortex"},{n:"PO3",x:120,y:244,r:"Visual Cortex"},{n:"POz",x:150,y:240,r:"Visual Cortex"},{n:"PO4",x:180,y:244,r:"Visual Cortex"},{n:"PO8",x:212,y:248,r:"Visual Cortex"},
+      {n:"O1",x:120,y:270,r:"Visual Cortex"},{n:"Oz",x:150,y:275,r:"Visual Cortex"},{n:"O2",x:180,y:270,r:"Visual Cortex"}
+    ];
+    const RC={"Frontal":"#cc9988","Frontal-Central":"#bb8899","Central-Temporal":"#aa99cc","Centro-Parietal":"#88aacc","Parietal":"#88bbdd","Visual Cortex":"#ffcc56"};
+    const vcChannels = ALL_CH.filter(c=>c.r==="Visual Cortex");
 
-    let currentSample = 0;
+    // ===== Signal generation =====
+    function sr(seed){let s=seed;return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};}
+    const chParams={};
+    ALL_CH.forEach((ch,i)=>{const rng=sr(124*137+i*53);const isV=ch.r==="Visual Cortex",isP=ch.r==="Parietal"||ch.r==="Centro-Parietal";const a=isV?1:isP?.6:.3;
+      chParams[ch.n]={tA:(.1+rng()*.3)*a,tF:4+rng()*4,aA:(.2+rng()*.4)*a,aF:8+rng()*5,bA:(.05+rng()*.2)*a,bF:13+rng()*17,gA:(.02+rng()*.1)*a,gF:30+rng()*30,ph:rng()*Math.PI*2,nL:.06+rng()*.1,p1:(.1+rng()*.4)*a,n1:(.08+rng()*.3)*a};
+    });
+    function es(d,tL){let v=d.tA*Math.sin(2*Math.PI*d.tF*tL+d.ph)+d.aA*Math.sin(2*Math.PI*d.aF*tL+d.ph*1.3)+d.bA*Math.sin(2*Math.PI*d.bF*tL+d.ph*.7)+d.gA*Math.sin(2*Math.PI*d.gF*tL+d.ph*2.1);v+=d.p1*Math.exp(-Math.pow((tL-.1)/.02,2))*Math.sin(2*Math.PI*10*tL);v-=d.n1*Math.exp(-Math.pow((tL-.17)/.025,2))*Math.sin(2*Math.PI*8*tL);return Math.max(-1,Math.min(1,v/1.5));}
 
-    // ---- Color for score ----
-    function scoreColor(score) {
-      if (score >= 0.7) return "#2d8a4e";
-      if (score >= 0.5) return "#b58a1b";
-      return "#c0392b";
+    function scoreColor(s){return s>=.7?"#2d8a4e":s>=.5?"#b58a1b":"#c0392b";}
+
+    // ===== Sample nav + state =====
+    let currentSample=0, playbackStart=0;
+    const nav=document.getElementById("sampleNav");
+    samples.forEach((s,i)=>{const btn=document.createElement("button");btn.className="sample-btn";btn.textContent=s.cat;btn.onclick=()=>showSample(i);nav.appendChild(btn);});
+
+    function showSample(index){
+      currentSample=index; playbackStart=0; // restart playback
+      const s=samples[index];
+      document.getElementById("recon").src=`${REPO}/${s.reconFile}`;
+      document.getElementById("gt").src=`${REPO}/${s.gtFile}`;
+      document.getElementById("scoreValue").textContent=s.score.toFixed(3);
+      const bar=document.getElementById("scoreBar");bar.style.width=Math.round(s.score*100)+"%";bar.style.background=scoreColor(s.score);
+      document.querySelectorAll(".sample-btn").forEach((b,i)=>b.classList.toggle("active",i===index));
     }
+    showSample(0);
 
-    // ---- Load sample ----
-    function showSample(index) {
-      currentSample = index;
-      const s = samples[index];
+    // ===== Playback canvas (visual cortex) =====
+    const cv=document.getElementById('eegCanvas');
+    const timeLabel=document.getElementById('playback-time');
+    const PLAY_DUR=2500, PAUSE_DUR=1500;
 
-      document.getElementById("brainwave").src = `${BRAINWAVE_REPO}/topo_${s.idx}.gif`;
-      document.getElementById("recon").src = `${REPO}/${s.reconFile}`;
-      document.getElementById("gt").src = `${REPO}/${s.gtFile}`;
+    // ===== Explorer =====
+    const cvExp=document.getElementById('explorerCanvas');
+    const expLabel=document.getElementById('explorerLabel');
+    let activeElectrode="Oz";
 
-      // Score
-      document.getElementById("scoreValue").textContent = s.score.toFixed(3);
-      const pct = Math.round(s.score * 100);
-      const bar = document.getElementById("scoreBar");
-      bar.style.width = pct + "%";
-      bar.style.background = scoreColor(s.score);
+    // Build head SVG
+    const svg=document.getElementById('headSvg');
+    const ns="http://www.w3.org/2000/svg";
+    [{tag:"circle",a:{cx:150,cy:165,r:130,fill:"none",stroke:"#ddd","stroke-width":1.5}},
+     {tag:"path",a:{d:"M140 36 L150 22 L160 36",fill:"none",stroke:"#ddd","stroke-width":1.2}},
+     {tag:"path",a:{d:"M20 145 Q12 165 20 185",fill:"none",stroke:"#ddd","stroke-width":1.2}},
+     {tag:"path",a:{d:"M280 145 Q288 165 280 185",fill:"none",stroke:"#ddd","stroke-width":1.2}}
+    ].forEach(e=>{const el=document.createElementNS(ns,e.tag);Object.entries(e.a).forEach(([k,v])=>el.setAttribute(k,v));svg.appendChild(el);});
 
-      // Update buttons
-      document.querySelectorAll(".sample-btn").forEach((btn, i) => {
-        btn.classList.toggle("active", i === index);
+    ALL_CH.forEach(ch=>{
+      const dot=document.createElementNS(ns,"circle");
+      dot.setAttribute("cx",ch.x);dot.setAttribute("cy",ch.y);
+      dot.setAttribute("r",ch.n===activeElectrode?6:3.5);
+      dot.setAttribute("fill",ch.n===activeElectrode?RC[ch.r]:"#ccc");
+      dot.setAttribute("opacity",ch.n===activeElectrode?"1":"0.4");
+      dot.classList.add("electrode-dot");dot.dataset.name=ch.n;dot.dataset.region=ch.r;
+      dot.addEventListener("mouseenter",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","5");dot.setAttribute("opacity","0.7");dot.setAttribute("fill",RC[ch.r]);}});
+      dot.addEventListener("mouseleave",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","3.5");dot.setAttribute("opacity","0.4");dot.setAttribute("fill","#ccc");}});
+      dot.addEventListener("click",()=>{
+        activeElectrode=ch.n;expLabel.innerHTML=`${ch.n} &mdash; ${ch.r}`;
+        svg.querySelectorAll('.electrode-dot').forEach(d=>{const a=d.dataset.name===ch.n;d.setAttribute("r",a?6:3.5);d.setAttribute("fill",a?RC[d.dataset.region]:"#ccc");d.setAttribute("opacity",a?"1":"0.4");});
       });
-    }
-
-    // ---- Build sample nav ----
-    const nav = document.getElementById("sampleNav");
-    samples.forEach((s, i) => {
-      const btn = document.createElement("button");
-      btn.className = "sample-btn";
-      btn.textContent = s.cat;
-      btn.onclick = () => showSample(i);
-      nav.appendChild(btn);
+      svg.appendChild(dot);
+      const lbl=document.createElementNS(ns,"text");lbl.setAttribute("x",ch.x);lbl.setAttribute("y",ch.y-6);lbl.classList.add("electrode-label-svg");lbl.textContent=ch.n;svg.appendChild(lbl);
     });
 
-    // ---- Init ----
-    showSample(0);
+    // Pulse visual cortex dots
+    (function pulse(now){const t=now/1000;svg.querySelectorAll('.electrode-dot').forEach(d=>{
+      if(d.dataset.region==="Visual Cortex"&&d.dataset.name!==activeElectrode){
+        d.setAttribute("r",3.5+Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*1);
+        d.setAttribute("opacity",0.3+Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*.15);
+        d.setAttribute("fill",RC["Visual Cortex"]);
+      }
+    });requestAnimationFrame(pulse);})(performance.now());
+
+    // ===== Main draw loop =====
+    function draw(now){
+      if(!playbackStart)playbackStart=now;
+      const elapsed=now-playbackStart;
+      const cyclePos=elapsed%(PLAY_DUR+PAUSE_DUR);
+      const prog=Math.min(cyclePos/PLAY_DUR,1);
+      timeLabel.textContent=prog<1?`${Math.round(prog*800)} ms`:'800 ms';
+
+      // ---- Playback canvas ----
+      const dpr=window.devicePixelRatio||1;
+      const rc=cv.getBoundingClientRect();cv.width=rc.width*dpr;cv.height=rc.height*dpr;
+      const x=cv.getContext('2d');x.scale(dpr,dpr);const W=rc.width,H=rc.height;
+      const n=vcChannels.length,cH=H/n;
+      x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);
+      const drawLimit=Math.floor(W*prog);
+
+      for(let i=0;i<n;i++){
+        const ch=vcChannels[i],d=chParams[ch.n];if(!d)continue;
+        const yC=cH*i+cH/2,a=cH/2-2;
+        x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;x.beginPath();x.moveTo(0,cH*(i+1));x.lineTo(W,cH*(i+1));x.stroke();
+        x.fillStyle="rgba(255,255,255,0.3)";x.font=`${Math.max(7,Math.min(10,cH*.4))}px "DM Sans",sans-serif`;x.fillText(ch.n,4,yC-a+Math.max(8,cH*.35));
+        x.strokeStyle=RC["Visual Cortex"];x.lineWidth=1.2;x.beginPath();
+        for(let p=0;p<drawLimit;p++){const tL=(p/W)*.8,v=es(d,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
+        x.stroke();
+        [{px:W*.125,tL:.1,c:"255,220,100"},{px:W*.2125,tL:.17,c:"255,150,80"}].forEach(m=>{
+          if(drawLimit>m.px){const dist=Math.abs(drawLimit-m.px)/W,gi=Math.exp(-Math.pow(dist/.04,2));
+            if(gi>.05){const pv=es(d,m.tL),py=yC+pv*a,g=x.createRadialGradient(m.px,py,0,m.px,py,14);g.addColorStop(0,`rgba(${m.c},${gi*.7})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-14,py-14,28,28);}}
+        });
+      }
+      if(prog<1){x.strokeStyle="rgba(255,255,255,0.4)";x.lineWidth=1;x.beginPath();x.moveTo(drawLimit,0);x.lineTo(drawLimit,H);x.stroke();
+        const cg=x.createLinearGradient(drawLimit-8,0,drawLimit+2,0);cg.addColorStop(0,"rgba(255,255,255,0)");cg.addColorStop(1,"rgba(255,255,255,0.05)");x.fillStyle=cg;x.fillRect(drawLimit-8,0,10,H);}
+      [{px:W*.125,l:"P100",c:"255,220,100"},{px:W*.2125,l:"N170",c:"255,150,80"}].forEach(m=>{
+        if(drawLimit>m.px){x.strokeStyle=`rgba(${m.c},.2)`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+          x.fillStyle=`rgba(${m.c},.5)`;x.font=`bold 8px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,9);x.textAlign="start";}
+      });
+      x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
+
+      // ---- Explorer canvas ----
+      const rc2=cvExp.getBoundingClientRect();cvExp.width=rc2.width*dpr;cvExp.height=rc2.height*dpr;
+      const x2=cvExp.getContext('2d');x2.scale(dpr,dpr);const W2=rc2.width,H2=rc2.height;
+      const d2=chParams[activeElectrode];
+      if(d2){
+        const eCh=ALL_CH.find(c=>c.n===activeElectrode);const isVC=eCh&&eCh.r==="Visual Cortex";const col2=eCh?RC[eCh.r]:"#888";
+        x2.fillStyle="#1a1a2e";x2.fillRect(0,0,W2,H2);const yC2=H2/2,a2=H2/2-16;
+        x2.strokeStyle="rgba(255,255,255,0.04)";x2.lineWidth=.5;x2.beginPath();x2.moveTo(0,yC2);x2.lineTo(W2,yC2);x2.stroke();
+        x2.strokeStyle=col2;x2.lineWidth=2;x2.beginPath();
+        for(let p=0;p<W2;p++){const tL=(p/W2)*.8,v=es(d2,tL),y=yC2+v*a2;p===0?x2.moveTo(p,y):x2.lineTo(p,y);}
+        x2.stroke();x2.lineTo(W2,yC2);x2.lineTo(0,yC2);x2.closePath();x2.globalAlpha=.08;x2.fillStyle=col2;x2.fill();x2.globalAlpha=1;
+        if(isVC){const gp=(elapsed/1000%3)/3;
+          [{px:W2*.125,tL:.1,t:.3,c:"255,220,100",l:"P100"},{px:W2*.2125,tL:.17,t:.6,c:"255,150,80",l:"N170"}].forEach(m=>{
+            const pv=es(d2,m.tL),py=yC2+pv*a2,gi=Math.exp(-Math.pow((gp-m.t)/.12,2));
+            if(gi>.05){const g=x2.createRadialGradient(m.px,py,0,m.px,py,20);g.addColorStop(0,`rgba(${m.c},${gi*.6})`);g.addColorStop(1,`rgba(${m.c},0)`);x2.fillStyle=g;x2.fillRect(m.px-20,py-20,40,40);}
+            x2.strokeStyle=`rgba(${m.c},${.12+gi*.3})`;x2.lineWidth=1;x2.setLineDash([2,2]);x2.beginPath();x2.moveTo(m.px,0);x2.lineTo(m.px,H2);x2.stroke();x2.setLineDash([]);
+            x2.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x2.font=`bold 9px "DM Sans",sans-serif`;x2.textAlign="center";x2.fillText(m.l,m.px,12);x2.textAlign="start";
+          });
+        }
+        x2.fillStyle="rgba(255,255,255,0.35)";x2.font=`11px "DM Sans",sans-serif`;x2.fillText(activeElectrode,6,16);
+        x2.fillStyle="rgba(255,255,255,0.15)";x2.font=`8px "DM Sans",sans-serif`;x2.fillText("0ms",4,H2-3);x2.textAlign="end";x2.fillText("800ms",W2-4,H2-3);x2.textAlign="start";
+      }
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
   </script>
 
 </body>
