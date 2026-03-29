@@ -12,40 +12,50 @@
   <style>
     main { max-width: 960px; }
     .viz-section { margin-bottom: 3.5rem; }
-    .viz-section h2 { margin-bottom: 0.5rem; }
     .viz-section > p { font-size: 0.95rem; color: #666; margin-bottom: 1.25rem; max-width: 600px; }
-    .viz-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; overflow: hidden; }
-    .viz-label { font-family: "DM Sans", system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; padding: 1rem 1.25rem 0.5rem; }
-    .viz-canvas { width: 100%; height: 320px; display: block; }
-    .cinema-canvas { width: 100%; height: 380px; display: block; }
-    .cinema-controls { padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; border-top: 1px solid #eee; }
-    .cinema-btn { background: #222; color: #fff; border: none; border-radius: 100px; padding: 0.35rem 1rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.8rem; cursor: pointer; }
-    .cinema-btn:hover { background: #444; }
-    .cinema-time { font-size: 0.8rem; color: #888; font-variant-numeric: tabular-nums; }
+    .pipeline-label { font-family: "DM Sans", system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 0.6rem; }
 
-    /* Head map layouts */
-    .headmap-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 380px; }
-    .headmap-left { padding: 1.25rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .headmap-svg { width: 100%; max-width: 300px; }
-    .headmap-right { background: #1a1a2e; padding: 1.25rem; display: flex; flex-direction: column; justify-content: center; }
-    .headmap-right canvas { width: 100%; height: 260px; }
-    .headmap-right .region-label { color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    /* Demo card (same as eeg-demo.html) */
+    .demo-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+    .demo-pipeline { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1rem; align-items: start; }
+    .demo-step { text-align: center; }
+    .demo-step img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: #e5e2dc; }
+    .score-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
+    .score-label { font-size: 0.8rem; font-weight: 500; color: #888; white-space: nowrap; }
+    .score-bar-bg { flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; background: #2d8a4e; }
+    .score-value { font-size: 0.85rem; font-weight: 600; color: #222; font-variant-numeric: tabular-nums; min-width: 3rem; text-align: right; }
+
+    /* Canvas in brain slot */
+    .brain-canvas { width: 100%; height: 100%; min-height: 220px; display: block; border-radius: 4px; }
+
+    /* Head map variants */
+    .headmap-inline { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 4px; overflow: hidden; min-height: 220px; }
+    .headmap-inline-left { display: flex; align-items: center; justify-content: center; padding: 0.5rem; }
+    .headmap-inline-left.dark { background: #f0eee8; }
+    .headmap-inline-left.warm { background: #f6f4f0; }
+    .headmap-inline-right { background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; padding: 0.5rem; }
+    .headmap-inline-right .rl { color: rgba(255,255,255,0.4); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+    .headmap-inline-right canvas { width: 100%; height: 180px; }
+    .headmap-svg { width: 100%; max-width: 180px; }
     .electrode-dot { cursor: pointer; transition: all 0.2s; }
-    .region-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 9px; fill: #999; pointer-events: none; }
+    .region-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 7px; fill: #999; pointer-events: none; }
 
-    /* Warm palette head map */
-    .warm-layout { display: grid; grid-template-columns: 1fr 1.2fr; min-height: 400px; }
-    .warm-left { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f6f4f0; }
-    .warm-right { background: #1a1a2e; padding: 1.25rem; display: flex; flex-direction: column; justify-content: center; }
-    .warm-right canvas { width: 100%; height: 280px; }
-    .warm-right .region-label { color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    /* Cinematic - full width card */
+    .cinema-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+    .cinema-canvas { width: 100%; height: 340px; display: block; }
+    .cinema-controls { padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-top: 1px solid #eee; }
+    .cinema-btn { background: #222; color: #fff; border: none; border-radius: 100px; padding: 0.3rem 0.85rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.78rem; cursor: pointer; }
+    .cinema-btn:hover { background: #444; }
+    .cinema-time { font-size: 0.78rem; color: #888; font-variant-numeric: tabular-nums; }
 
-    /* 3D brain */
-    .brain3d-container { width: 100%; height: 400px; background: #0a0a14; cursor: grab; }
-    .brain3d-container:active { cursor: grabbing; }
+    /* 3D brain in slot */
+    .brain3d-slot { width: 100%; min-height: 220px; background: #0a0a14; border-radius: 4px; cursor: grab; overflow: hidden; }
+    .brain3d-slot:active { cursor: grabbing; }
 
-    @media (max-width: 700px) {
-      .headmap-layout, .warm-layout { grid-template-columns: 1fr; }
+    @media (max-width: 600px) {
+      .demo-pipeline { grid-template-columns: 1fr; gap: 1.25rem; }
+      .headmap-inline { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -60,566 +70,311 @@
   </header>
 
   <main>
-
     <section class="project-header">
       <h1>Visualization Options</h1>
-      <p class="project-subtitle">Six approaches for the brain activity panel. Sample: orange (idx 124).</p>
+      <p class="project-subtitle">Each option shown in context, as it would appear on the demo page. Sample: orange.</p>
     </section>
-
     <hr>
 
-    <!-- OPTION A -->
-    <section class="viz-section" id="optA">
+    <!-- A: Animated Waveforms -->
+    <section class="viz-section">
       <h2>A: Animated Waveforms</h2>
-      <p>The original style. 8 visual cortex channels on a dark background, scrolling in real time. Clean and techy.</p>
-      <div class="viz-card">
-        <div class="viz-label">Brain Activity</div>
-        <canvas class="viz-canvas" id="canvasA"></canvas>
+      <p>The original style. 8 channels, dark background, scrolling.</p>
+      <div class="demo-card">
+        <div class="demo-pipeline">
+          <div class="demo-step">
+            <div class="pipeline-label">Brain Activity</div>
+            <canvas class="brain-canvas" id="canvasA"></canvas>
+          </div>
+          <div class="demo-step">
+            <div class="pipeline-label">AI Reconstruction</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
+          </div>
+          <div class="demo-step">
+            <div class="pipeline-label">Ground Truth</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-label">CLIP Similarity</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+          <span class="score-value">0.797</span>
+        </div>
       </div>
     </section>
 
-    <!-- OPTION B -->
-    <section class="viz-section" id="optB">
+    <!-- B: Glowing Peaks -->
+    <section class="viz-section">
       <h2>B: Waveforms with Glowing Peaks</h2>
-      <p>Same waveform style, but the P100 and N170 peaks pulse with light when the brain "recognizes" the object. Like a heartbeat monitor moment.</p>
-      <div class="viz-card">
-        <div class="viz-label">Brain Activity &mdash; peaks highlighted</div>
-        <canvas class="viz-canvas" id="canvasB"></canvas>
+      <p>Same style but P100/N170 peaks pulse with golden light when the brain "recognizes" the object.</p>
+      <div class="demo-card">
+        <div class="demo-pipeline">
+          <div class="demo-step">
+            <div class="pipeline-label">Brain Activity</div>
+            <canvas class="brain-canvas" id="canvasB"></canvas>
+          </div>
+          <div class="demo-step">
+            <div class="pipeline-label">AI Reconstruction</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
+          </div>
+          <div class="demo-step">
+            <div class="pipeline-label">Ground Truth</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-label">CLIP Similarity</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+          <span class="score-value">0.797</span>
+        </div>
       </div>
     </section>
 
-    <!-- OPTION C -->
-    <section class="viz-section" id="optC">
+    <!-- C: Interactive Head Map (dark) -->
+    <section class="viz-section">
       <h2>C: Interactive Head Map</h2>
-      <p>Click a brain region to see its waveforms. Electrode dots pulse with signal strength. Dark waveform panel on the right.</p>
-      <div class="viz-card">
-        <div class="headmap-layout">
-          <div class="headmap-left">
-            <svg class="headmap-svg" viewBox="0 0 300 320" id="headSvgC"></svg>
+      <p>Click brain regions on the head to explore their waveforms.</p>
+      <div class="demo-card">
+        <div class="demo-pipeline">
+          <div class="demo-step">
+            <div class="pipeline-label">Brain Activity</div>
+            <div class="headmap-inline">
+              <div class="headmap-inline-left dark">
+                <svg class="headmap-svg" viewBox="0 0 300 320" id="headSvgC"></svg>
+              </div>
+              <div class="headmap-inline-right">
+                <div class="rl" id="regionLabelC">Visual Cortex</div>
+                <canvas id="canvasC" height="180"></canvas>
+              </div>
+            </div>
           </div>
-          <div class="headmap-right">
-            <div class="region-label" id="regionLabelC">Visual Cortex</div>
-            <canvas id="canvasC" height="260"></canvas>
+          <div class="demo-step">
+            <div class="pipeline-label">AI Reconstruction</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
           </div>
+          <div class="demo-step">
+            <div class="pipeline-label">Ground Truth</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-label">CLIP Similarity</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+          <span class="score-value">0.797</span>
         </div>
       </div>
     </section>
 
-    <!-- OPTION D -->
-    <section class="viz-section" id="optD">
+    <!-- D: Warm-Palette Explorer -->
+    <section class="viz-section">
       <h2>D: Warm-Palette Explorer</h2>
-      <p>Same interactive head map concept, but the head uses your site's warm cream/amber palette instead of clinical colors. Click a region to explore.</p>
-      <div class="viz-card">
-        <div class="warm-layout">
-          <div class="warm-left">
-            <svg class="headmap-svg" viewBox="0 0 300 320" id="headSvgD"></svg>
+      <p>Same interactive concept, warm amber/cream colors matching the site.</p>
+      <div class="demo-card">
+        <div class="demo-pipeline">
+          <div class="demo-step">
+            <div class="pipeline-label">Brain Activity</div>
+            <div class="headmap-inline">
+              <div class="headmap-inline-left warm">
+                <svg class="headmap-svg" viewBox="0 0 300 320" id="headSvgD"></svg>
+              </div>
+              <div class="headmap-inline-right">
+                <div class="rl" id="regionLabelD">Visual Cortex</div>
+                <canvas id="canvasD" height="180"></canvas>
+              </div>
+            </div>
           </div>
-          <div class="warm-right">
-            <div class="region-label" id="regionLabelD">Visual Cortex</div>
-            <canvas id="canvasD" height="280"></canvas>
+          <div class="demo-step">
+            <div class="pipeline-label">AI Reconstruction</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
           </div>
+          <div class="demo-step">
+            <div class="pipeline-label">Ground Truth</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-label">CLIP Similarity</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+          <span class="score-value">0.797</span>
         </div>
       </div>
     </section>
 
-    <!-- OPTION E -->
-    <section class="viz-section" id="optE">
+    <!-- E: Cinematic (full-width, replaces whole card) -->
+    <section class="viz-section">
       <h2>E: Cinematic Sequence</h2>
-      <p>"Watch a brain see." The image flashes, waveforms ripple with glowing peaks, the reconstruction emerges from blur, and the score counts up. Loops every 4 seconds.</p>
-      <div class="viz-card">
+      <p>Replaces the 3-column layout with a single cinematic animation. Flash, brain fires, reconstruction emerges.</p>
+      <div class="cinema-card">
         <canvas class="cinema-canvas" id="canvasE"></canvas>
         <div class="cinema-controls">
           <button class="cinema-btn" id="replayBtn">Replay</button>
           <span class="cinema-time" id="cinemaTime">0 ms</span>
+          <span style="margin-left:auto;font-size:.78rem;color:#888">CLIP Similarity: 0.797</span>
         </div>
       </div>
     </section>
 
-    <!-- OPTION F -->
-    <section class="viz-section" id="optF">
+    <!-- F: 3D Brain -->
+    <section class="viz-section">
       <h2>F: 3D Rotating Brain</h2>
-      <p>A slowly rotating 3D brain with electrode positions glowing based on signal amplitude. The visual cortex lights up as data plays. Drag to rotate.</p>
-      <div class="viz-card">
-        <div class="brain3d-container" id="brain3d"></div>
+      <p>Visual cortex electrodes glow as data plays. Drag to rotate.</p>
+      <div class="demo-card">
+        <div class="demo-pipeline">
+          <div class="demo-step">
+            <div class="pipeline-label">Brain Activity</div>
+            <div class="brain3d-slot" id="brain3d"></div>
+          </div>
+          <div class="demo-step">
+            <div class="pipeline-label">AI Reconstruction</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
+          </div>
+          <div class="demo-step">
+            <div class="pipeline-label">Ground Truth</div>
+            <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-label">CLIP Similarity</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+          <span class="score-value">0.797</span>
+        </div>
       </div>
     </section>
 
   </main>
-
-  <footer>
-    <p><a href="/">Aaron Jacobson</a></p>
-  </footer>
+  <footer><p><a href="/">Aaron Jacobson</a></p></footer>
 
   <script>
-    // ===== Shared EEG signal generation =====
-    function seededRand(seed) {
-      let s = seed;
-      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    }
-    const chNames = ["O1","Oz","O2","PO3","POz","PO4","PO7","PO8"];
-    const chColors = ["#6ec6ff","#5eb8ff","#4eaaff","#ff8a80","#ff7070","#a0e87a","#80d860","#ffcc56"];
-    const rand = seededRand(124 * 137);
-    const waveParams = chNames.map(() => ({
-      tA:.2+rand()*.4, tF:4+rand()*4, aA:.3+rand()*.5, aF:8+rand()*5,
-      bA:.1+rand()*.3, bF:13+rand()*17, gA:.05+rand()*.15, gF:30+rand()*30,
-      ph:rand()*Math.PI*2, nL:.08+rand()*.12, p1:.3+rand()*.5, n1:.2+rand()*.4
-    }));
-    function eegSig(d, t, tL) {
-      let v = d.tA*Math.sin(2*Math.PI*d.tF*t+d.ph) + d.aA*Math.sin(2*Math.PI*d.aF*t+d.ph*1.3)
-            + d.bA*Math.sin(2*Math.PI*d.bF*t+d.ph*.7) + d.gA*Math.sin(2*Math.PI*d.gF*t+d.ph*2.1);
-      v += d.p1*Math.exp(-Math.pow((tL-.1)/.02,2))*Math.sin(2*Math.PI*10*tL);
-      v -= d.n1*Math.exp(-Math.pow((tL-.17)/.025,2))*Math.sin(2*Math.PI*8*tL);
-      v += (Math.random()-.5)*d.nL*2;
-      return Math.max(-1,Math.min(1,v/1.5));
-    }
+    // ===== Shared =====
+    function sr(seed){let s=seed;return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;}}
+    const chN=["O1","Oz","O2","PO3","POz","PO4","PO7","PO8"];
+    const chC=["#6ec6ff","#5eb8ff","#4eaaff","#ff8a80","#ff7070","#a0e87a","#80d860","#ffcc56"];
+    const r=sr(124*137);
+    const wp=chN.map(()=>({tA:.2+r()*.4,tF:4+r()*4,aA:.3+r()*.5,aF:8+r()*5,bA:.1+r()*.3,bF:13+r()*17,gA:.05+r()*.15,gF:30+r()*30,ph:r()*Math.PI*2,nL:.08+r()*.12,p1:.3+r()*.5,n1:.2+r()*.4}));
+    function es(d,t,tL){let v=d.tA*Math.sin(2*Math.PI*d.tF*t+d.ph)+d.aA*Math.sin(2*Math.PI*d.aF*t+d.ph*1.3)+d.bA*Math.sin(2*Math.PI*d.bF*t+d.ph*.7)+d.gA*Math.sin(2*Math.PI*d.gF*t+d.ph*2.1);v+=d.p1*Math.exp(-Math.pow((tL-.1)/.02,2))*Math.sin(2*Math.PI*10*tL);v-=d.n1*Math.exp(-Math.pow((tL-.17)/.025,2))*Math.sin(2*Math.PI*8*tL);v+=(Math.random()-.5)*d.nL*2;return Math.max(-1,Math.min(1,v/1.5));}
+    function sc(c){const d=window.devicePixelRatio||1,rc=c.getBoundingClientRect();c.width=rc.width*d;c.height=rc.height*d;const x=c.getContext('2d');x.scale(d,d);return{x,W:rc.width,H:rc.height};}
 
-    // Shared canvas setup
-    function setupCanvas(canvas) {
-      const dpr = window.devicePixelRatio||1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width*dpr; canvas.height = rect.height*dpr;
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr,dpr);
-      return { ctx, W: rect.width, H: rect.height };
-    }
-
-    // Draw basic waveforms
-    function drawWaveforms(ctx, W, H, elapsed, params, names, colors, opts={}) {
-      const nCh = names.length, chH = H/nCh;
-      ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0,0,W,H);
-      for (let ch=0; ch<nCh; ch++) {
-        const d = params[ch], yC = chH*ch+chH/2, amp = chH/2-4;
-        ctx.strokeStyle = "rgba(255,255,255,0.06)"; ctx.lineWidth=.5;
-        ctx.beginPath(); ctx.moveTo(0,chH*(ch+1)); ctx.lineTo(W,chH*(ch+1)); ctx.stroke();
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.font = `${Math.max(9,W*.025)}px "DM Sans",sans-serif`;
-        ctx.fillText(names[ch], 6, yC-amp+12);
-        ctx.strokeStyle = colors[ch]; ctx.lineWidth = 1.3; ctx.beginPath();
-        for (let px=0; px<W; px++) {
-          const tL=(px/W)*.8, t=tL+elapsed*.15, v=eegSig(d,t,tL), y=yC+v*amp;
-          px===0?ctx.moveTo(px,y):ctx.lineTo(px,y);
-        }
-        ctx.stroke();
-
-        // Glowing peaks (for option B)
-        if (opts.glow) {
-          const time = elapsed % 4;
-          // P100 glow
-          const p100x = W * 0.125;
-          const p100Local = 0.1;
-          const p100v = eegSig(d, p100Local, p100Local);
-          const p100y = yC + p100v * amp;
-          const p100Phase = (time % 2) / 2;
-          const p100Intensity = Math.exp(-Math.pow((p100Phase - 0.15) / 0.1, 2));
-          if (p100Intensity > 0.05) {
-            const g = ctx.createRadialGradient(p100x, p100y, 0, p100x, p100y, 20);
-            g.addColorStop(0, `rgba(255,220,100,${p100Intensity * 0.7})`);
-            g.addColorStop(1, "rgba(255,220,100,0)");
-            ctx.fillStyle = g; ctx.fillRect(p100x-20,p100y-20,40,40);
-          }
-          // N170 glow
-          const n170x = W * 0.2125;
-          const n170Local = 0.17;
-          const n170v = eegSig(d, n170Local, n170Local);
-          const n170y = yC + n170v * amp;
-          const n170Intensity = Math.exp(-Math.pow((p100Phase - 0.25) / 0.1, 2));
-          if (n170Intensity > 0.05) {
-            const g2 = ctx.createRadialGradient(n170x, n170y, 0, n170x, n170y, 20);
-            g2.addColorStop(0, `rgba(255,150,80,${n170Intensity * 0.6})`);
-            g2.addColorStop(1, "rgba(255,150,80,0)");
-            ctx.fillStyle = g2; ctx.fillRect(n170x-20,n170y-20,40,40);
-          }
+    function drawW(x,W,H,el,ps,ns,cs,opts={}){
+      const n=ns.length,cH=H/n;
+      x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);
+      for(let c=0;c<n;c++){const d=ps[c],yC=cH*c+cH/2,a=cH/2-3;
+        x.strokeStyle="rgba(255,255,255,0.06)";x.lineWidth=.5;x.beginPath();x.moveTo(0,cH*(c+1));x.lineTo(W,cH*(c+1));x.stroke();
+        x.fillStyle="rgba(255,255,255,0.3)";x.font=`${Math.max(8,W*.03)}px "DM Sans",sans-serif`;x.fillText(ns[c],4,yC-a+10);
+        x.strokeStyle=cs[c];x.lineWidth=1.2;x.beginPath();
+        for(let p=0;p<W;p++){const tL=(p/W)*.8,t=tL+el*.15,v=es(d,t,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
+        x.stroke();
+        if(opts.glow){const tm=el%4,ph=(tm%2)/2;
+          [{px:W*.125,tL:.1,t:.15,c:"255,220,100"},{px:W*.2125,tL:.17,t:.25,c:"255,150,80"}].forEach(m=>{
+            const pv=es(d,m.tL,m.tL),py=yC+pv*a,gi=Math.exp(-Math.pow((ph-m.t)/.1,2));
+            if(gi>.05){const g=x.createRadialGradient(m.px,py,0,m.px,py,16);g.addColorStop(0,`rgba(${m.c},${gi*.7})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-16,py-16,32,32);}
+          });
         }
       }
-      // Time labels
-      ctx.fillStyle = "rgba(255,255,255,0.25)";
-      ctx.font = `${Math.max(9,W*.022)}px "DM Sans",sans-serif`;
-      ctx.fillText("0 ms",6,H-6); ctx.fillText("800 ms",W-50,H-6);
-
-      // P100/N170 markers for glow mode
-      if (opts.glow) {
-        const time = elapsed % 4;
-        const phase = (time % 2) / 2;
-        [{x:W*0.125, label:"P100", color:"255,220,100", t:0.15},
-         {x:W*0.2125, label:"N170", color:"255,150,80", t:0.25}].forEach(m => {
-          const intensity = Math.exp(-Math.pow((phase - m.t) / 0.1, 2));
-          ctx.strokeStyle = `rgba(${m.color},${0.15 + intensity * 0.4})`;
-          ctx.lineWidth = 1; ctx.setLineDash([3,3]);
-          ctx.beginPath(); ctx.moveTo(m.x,0); ctx.lineTo(m.x,H); ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.fillStyle = `rgba(${m.color},${0.3 + intensity * 0.5})`;
-          ctx.font = `bold ${Math.max(9,W*.022)}px "DM Sans",sans-serif`;
-          ctx.textAlign = "center"; ctx.fillText(m.label, m.x, 14); ctx.textAlign = "start";
+      x.fillStyle="rgba(255,255,255,0.2)";x.font=`${Math.max(8,W*.025)}px "DM Sans",sans-serif`;x.fillText("0ms",4,H-3);x.fillText("800ms",W-40,H-3);
+      if(opts.glow){const tm=el%4,ph=(tm%2)/2;
+        [{px:W*.125,l:"P100",c:"255,220,100",t:.15},{px:W*.2125,l:"N170",c:"255,150,80",t:.25}].forEach(m=>{
+          const gi=Math.exp(-Math.pow((ph-m.t)/.1,2));x.strokeStyle=`rgba(${m.c},${.15+gi*.4})`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+          x.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x.font=`bold ${Math.max(8,W*.025)}px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,11);x.textAlign="start";
         });
       }
     }
 
-    // ===== OPTION A: Basic animated waveforms =====
-    (function(){
-      const c = document.getElementById('canvasA'); let s=0;
-      function draw(now) {
-        if(!s)s=now; const {ctx,W,H}=setupCanvas(c);
-        drawWaveforms(ctx,W,H,(now-s)/1000,waveParams,chNames,chColors);
-        requestAnimationFrame(draw);
-      } requestAnimationFrame(draw);
-    })();
+    // A
+    (function(){const c=document.getElementById('canvasA');let s=0;function d(n){if(!s)s=n;const{x,W,H}=sc(c);drawW(x,W,H,(n-s)/1000,wp,chN,chC);requestAnimationFrame(d);}requestAnimationFrame(d);})();
+    // B
+    (function(){const c=document.getElementById('canvasB');let s=0;function d(n){if(!s)s=n;const{x,W,H}=sc(c);drawW(x,W,H,(n-s)/1000,wp,chN,chC,{glow:true});requestAnimationFrame(d);}requestAnimationFrame(d);})();
 
-    // ===== OPTION B: Waveforms with glowing peaks =====
-    (function(){
-      const c = document.getElementById('canvasB'); let s=0;
-      function draw(now) {
-        if(!s)s=now; const {ctx,W,H}=setupCanvas(c);
-        drawWaveforms(ctx,W,H,(now-s)/1000,waveParams,chNames,chColors,{glow:true});
-        requestAnimationFrame(draw);
-      } requestAnimationFrame(draw);
-    })();
-
-    // ===== Shared: SVG head map builder =====
-    const regions = {
-      "Frontal": { color:"#aaa", warmColor:"#c4a882",
-        electrodes: [{name:"Fp1",x:120,y:45},{name:"Fp2",x:180,y:45},{name:"F7",x:70,y:95},{name:"F3",x:115,y:95},{name:"Fz",x:150,y:85},{name:"F4",x:185,y:95},{name:"F8",x:230,y:95}]
-      },
-      "Central": { color:"#bbb", warmColor:"#b8a080",
-        electrodes: [{name:"C3",x:100,y:155},{name:"Cz",x:150,y:145},{name:"C4",x:200,y:155},{name:"T7",x:50,y:155},{name:"T8",x:250,y:155}]
-      },
-      "Parietal": { color:"#ccc", warmColor:"#a89878",
-        electrodes: [{name:"P7",x:75,y:215},{name:"P3",x:115,y:210},{name:"Pz",x:150,y:205},{name:"P4",x:185,y:210},{name:"P8",x:225,y:215}]
-      },
-      "Visual Cortex": { color:"#ffcc56", warmColor:"#d4891a",
-        electrodes: [{name:"PO7",x:90,y:245},{name:"PO3",x:120,y:240},{name:"POz",x:150,y:235},{name:"PO4",x:180,y:240},{name:"PO8",x:210,y:245},{name:"O1",x:120,y:270},{name:"Oz",x:150,y:275},{name:"O2",x:180,y:270}]
-      }
+    // Head map builder
+    const regions={
+      "Frontal":{color:"#aaa",warm:"#c4a882",electrodes:[{n:"Fp1",x:120,y:45},{n:"Fp2",x:180,y:45},{n:"F7",x:70,y:95},{n:"F3",x:115,y:95},{n:"Fz",x:150,y:85},{n:"F4",x:185,y:95},{n:"F8",x:230,y:95}]},
+      "Central":{color:"#bbb",warm:"#b8a080",electrodes:[{n:"C3",x:100,y:155},{n:"Cz",x:150,y:145},{n:"C4",x:200,y:155},{n:"T7",x:50,y:155},{n:"T8",x:250,y:155}]},
+      "Parietal":{color:"#ccc",warm:"#a89878",electrodes:[{n:"P7",x:75,y:215},{n:"P3",x:115,y:210},{n:"Pz",x:150,y:205},{n:"P4",x:185,y:210},{n:"P8",x:225,y:215}]},
+      "Visual Cortex":{color:"#ffcc56",warm:"#d4891a",electrodes:[{n:"PO7",x:90,y:245},{n:"PO3",x:120,y:240},{n:"POz",x:150,y:235},{n:"PO4",x:180,y:240},{n:"PO8",x:210,y:245},{n:"O1",x:120,y:270},{n:"Oz",x:150,y:275},{n:"O2",x:180,y:270}]}
     };
-
-    function buildHeadSvg(svgEl, useWarm, onRegionClick) {
-      const ns = "http://www.w3.org/2000/svg";
-      // Head
-      const head = document.createElementNS(ns,"circle");
-      head.setAttribute("cx",150); head.setAttribute("cy",165); head.setAttribute("r",130);
-      head.setAttribute("fill","none"); head.setAttribute("stroke", useWarm?"#ccc":"#ddd"); head.setAttribute("stroke-width","2");
-      svgEl.appendChild(head);
-      // Nose
-      const nose = document.createElementNS(ns,"path");
-      nose.setAttribute("d","M140 36 L150 20 L160 36");
-      nose.setAttribute("fill","none"); nose.setAttribute("stroke",useWarm?"#ccc":"#ddd"); nose.setAttribute("stroke-width","1.5");
-      svgEl.appendChild(nose);
-      // Ears
-      ["M20 145 Q10 165 20 185","M280 145 Q290 165 280 185"].forEach(d => {
-        const ear = document.createElementNS(ns,"path");
-        ear.setAttribute("d",d); ear.setAttribute("fill","none");
-        ear.setAttribute("stroke",useWarm?"#ccc":"#ddd"); ear.setAttribute("stroke-width","1.5");
-        svgEl.appendChild(ear);
+    function buildHead(svg,warm,cb){
+      const ns="http://www.w3.org/2000/svg",sc=warm?"#ccc":"#ddd";
+      [{tag:"circle",a:{cx:150,cy:165,r:130,fill:"none",stroke:sc,"stroke-width":2}},
+       {tag:"path",a:{d:"M140 36 L150 20 L160 36",fill:"none",stroke:sc,"stroke-width":1.5}},
+       {tag:"path",a:{d:"M20 145 Q10 165 20 185",fill:"none",stroke:sc,"stroke-width":1.5}},
+       {tag:"path",a:{d:"M280 145 Q290 165 280 185",fill:"none",stroke:sc,"stroke-width":1.5}}
+      ].forEach(e=>{const el=document.createElementNS(ns,e.tag);Object.entries(e.a).forEach(([k,v])=>el.setAttribute(k,v));svg.appendChild(el);});
+      let act="Visual Cortex";
+      Object.entries(regions).forEach(([name,reg])=>{
+        const g=document.createElementNS(ns,"g");g.style.cursor="pointer";
+        reg.electrodes.forEach(e=>{const d=document.createElementNS(ns,"circle");d.setAttribute("cx",e.x);d.setAttribute("cy",e.y);d.setAttribute("r",name===act?5:3.5);d.setAttribute("fill",name===act?(warm?reg.warm:reg.color):(warm?"#d0c8b8":"#ccc"));d.setAttribute("opacity",name===act?"1":"0.5");d.classList.add("electrode-dot");d.dataset.region=name;d.dataset.svg=svg.id;g.appendChild(d);});
+        const ax=reg.electrodes.reduce((s,e)=>s+e.x,0)/reg.electrodes.length,my=Math.min(...reg.electrodes.map(e=>e.y));
+        const l=document.createElementNS(ns,"text");l.setAttribute("x",ax);l.setAttribute("y",my-8);l.setAttribute("text-anchor","middle");l.classList.add("region-label-svg");if(warm)l.style.fill="#998877";l.textContent=name;g.appendChild(l);
+        g.addEventListener("click",()=>{act=name;svg.querySelectorAll('.electrode-dot').forEach(d=>{const rn=d.dataset.region;d.setAttribute("r",rn===name?5:3.5);d.setAttribute("fill",rn===name?(warm?regions[rn].warm:regions[rn].color):(warm?"#d0c8b8":"#ccc"));d.setAttribute("opacity",rn===name?"1":"0.5");});cb(name);});
+        svg.appendChild(g);
       });
-      // Regions
-      let activeRegion = "Visual Cortex";
-      Object.entries(regions).forEach(([name, region]) => {
-        const g = document.createElementNS(ns,"g");
-        g.style.cursor = "pointer";
-        region.electrodes.forEach(e => {
-          const dot = document.createElementNS(ns,"circle");
-          dot.setAttribute("cx",e.x); dot.setAttribute("cy",e.y);
-          dot.setAttribute("r", name===activeRegion?6:4);
-          dot.setAttribute("fill", name===activeRegion?(useWarm?region.warmColor:region.color):(useWarm?"#d0c8b8":"#ccc"));
-          dot.setAttribute("opacity", name===activeRegion?"1":"0.5");
-          dot.classList.add("electrode-dot"); dot.dataset.region = name; dot.dataset.svg = svgEl.id;
-          g.appendChild(dot);
-        });
-        const avgX = region.electrodes.reduce((s,e)=>s+e.x,0)/region.electrodes.length;
-        const minY = Math.min(...region.electrodes.map(e=>e.y));
-        const label = document.createElementNS(ns,"text");
-        label.setAttribute("x",avgX); label.setAttribute("y",minY-10);
-        label.setAttribute("text-anchor","middle"); label.classList.add("region-label-svg");
-        if(useWarm) label.style.fill = "#998877";
-        label.textContent = name; g.appendChild(label);
-        g.addEventListener("click", () => {
-          activeRegion = name;
-          svgEl.querySelectorAll('.electrode-dot').forEach(d => {
-            const r = d.dataset.region;
-            d.setAttribute("r", r===name?6:4);
-            d.setAttribute("fill", r===name?(useWarm?regions[r].warmColor:regions[r].color):(useWarm?"#d0c8b8":"#ccc"));
-            d.setAttribute("opacity", r===name?"1":"0.5");
-          });
-          onRegionClick(name);
-        });
-        svgEl.appendChild(g);
-      });
-
-      // Pulse animation
-      function pulse(now) {
-        const t = now/1000;
-        svgEl.querySelectorAll('.electrode-dot').forEach(dot => {
-          if(dot.dataset.region==="Visual Cortex" && dot.dataset.svg===svgEl.id) {
-            const base = dot.getAttribute("opacity")==="1"?5:4;
-            const p = base + Math.sin(t*3+parseFloat(dot.getAttribute("cx"))*.1)*1.5;
-            if(dot.getAttribute("opacity")==="1") dot.setAttribute("r",p);
-          }
-        });
-        requestAnimationFrame(pulse);
-      }
-      requestAnimationFrame(pulse);
+      (function pulse(now){const t=now/1000;svg.querySelectorAll('.electrode-dot').forEach(d=>{if(d.dataset.region==="Visual Cortex"&&d.dataset.svg===svg.id){const b=d.getAttribute("opacity")==="1"?4:3.5;const p=b+Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*1.2;if(d.getAttribute("opacity")==="1")d.setAttribute("r",p);}});requestAnimationFrame(pulse);})(performance.now());
     }
 
-    // ===== OPTION C: Interactive Head Map (dark) =====
-    (function(){
-      const canvas = document.getElementById('canvasC');
-      const label = document.getElementById('regionLabelC');
-      let activeRegion = "Visual Cortex", s=0;
-
-      buildHeadSvg(document.getElementById('headSvgC'), false, (name) => {
-        activeRegion = name; label.textContent = name;
-      });
-
-      function draw(now) {
-        if(!s)s=now; const {ctx,W,H}=setupCanvas(canvas);
-        let names, colors, params;
-        if(activeRegion==="Visual Cortex") { names=chNames; colors=chColors; params=waveParams; }
-        else {
-          const re=regions[activeRegion].electrodes; names=re.map(e=>e.name);
-          colors=re.map((_,i)=>`hsl(${200+i*30},40%,60%)`);
-          const rr=seededRand(activeRegion.length*99);
-          params=re.map(()=>({tA:.1+rr()*.15,tF:4+rr()*4,aA:.15+rr()*.2,aF:8+rr()*5,bA:.05+rr()*.1,bF:13+rr()*17,gA:.02+rr()*.05,gF:30+rr()*30,ph:rr()*Math.PI*2,nL:.1+rr()*.15,p1:.05+rr()*.1,n1:.03+rr()*.08}));
-        }
-        drawWaveforms(ctx,W,H,(now-s)/1000,params,names,colors);
-        requestAnimationFrame(draw);
-      } requestAnimationFrame(draw);
+    // C
+    (function(){const cv=document.getElementById('canvasC'),lb=document.getElementById('regionLabelC');let ar="Visual Cortex",s=0;
+      buildHead(document.getElementById('headSvgC'),false,n=>{ar=n;lb.textContent=n;});
+      function d(now){if(!s)s=now;const{x,W,H}=sc(cv);let ns2,cs2,ps2;
+        if(ar==="Visual Cortex"){ns2=chN;cs2=chC;ps2=wp;}else{const re=regions[ar].electrodes;ns2=re.map(e=>e.n);cs2=re.map((_,i)=>`hsl(${200+i*30},40%,60%)`);const rr=sr(ar.length*99);ps2=re.map(()=>({tA:.1+rr()*.15,tF:4+rr()*4,aA:.15+rr()*.2,aF:8+rr()*5,bA:.05+rr()*.1,bF:13+rr()*17,gA:.02+rr()*.05,gF:30+rr()*30,ph:rr()*Math.PI*2,nL:.1+rr()*.15,p1:.05+rr()*.1,n1:.03+rr()*.08}));}
+        drawW(x,W,H,(now-s)/1000,ps2,ns2,cs2);requestAnimationFrame(d);}requestAnimationFrame(d);
+    })();
+    // D
+    (function(){const cv=document.getElementById('canvasD'),lb=document.getElementById('regionLabelD');let ar="Visual Cortex",s=0;
+      const wc=["#d4891a","#c87d15","#bc7110","#e8a030","#dda028","#c89020","#b88018","#a87010"];
+      buildHead(document.getElementById('headSvgD'),true,n=>{ar=n;lb.textContent=n;});
+      function d(now){if(!s)s=now;const{x,W,H}=sc(cv);let ns2,cs2,ps2;
+        if(ar==="Visual Cortex"){ns2=chN;cs2=wc;ps2=wp;}else{const re=regions[ar].electrodes;ns2=re.map(e=>e.n);cs2=re.map((_,i)=>`hsl(${30+i*8},${30+i*5}%,${45+i*5}%)`);const rr=sr(ar.length*99);ps2=re.map(()=>({tA:.1+rr()*.15,tF:4+rr()*4,aA:.15+rr()*.2,aF:8+rr()*5,bA:.05+rr()*.1,bF:13+rr()*17,gA:.02+rr()*.05,gF:30+rr()*30,ph:rr()*Math.PI*2,nL:.1+rr()*.15,p1:.05+rr()*.1,n1:.03+rr()*.08}));}
+        drawW(x,W,H,(now-s)/1000,ps2,ns2,cs2);requestAnimationFrame(d);}requestAnimationFrame(d);
     })();
 
-    // ===== OPTION D: Warm-Palette Explorer =====
-    (function(){
-      const canvas = document.getElementById('canvasD');
-      const label = document.getElementById('regionLabelD');
-      let activeRegion = "Visual Cortex", s=0;
-
-      buildHeadSvg(document.getElementById('headSvgD'), true, (name) => {
-        activeRegion = name; label.textContent = name;
-      });
-
-      const warmChColors = ["#d4891a","#c87d15","#bc7110","#e8a030","#dda028","#c89020","#b88018","#a87010"];
-
-      function draw(now) {
-        if(!s)s=now; const {ctx,W,H}=setupCanvas(canvas);
-        let names, colors, params;
-        if(activeRegion==="Visual Cortex") { names=chNames; colors=warmChColors; params=waveParams; }
-        else {
-          const re=regions[activeRegion].electrodes; names=re.map(e=>e.name);
-          colors=re.map((_,i)=>`hsl(${30+i*8},${30+i*5}%,${45+i*5}%)`);
-          const rr=seededRand(activeRegion.length*99);
-          params=re.map(()=>({tA:.1+rr()*.15,tF:4+rr()*4,aA:.15+rr()*.2,aF:8+rr()*5,bA:.05+rr()*.1,bF:13+rr()*17,gA:.02+rr()*.05,gF:30+rr()*30,ph:rr()*Math.PI*2,nL:.1+rr()*.15,p1:.05+rr()*.1,n1:.03+rr()*.08}));
+    // E: Cinematic
+    (function(){const cv=document.getElementById('canvasE'),rb=document.getElementById('replayBtn'),td=document.getElementById('cinemaTime');
+      const gi=new Image();gi.crossOrigin="anonymous";gi.src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png";
+      const ri=new Image();ri.crossOrigin="anonymous";ri.src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png";
+      let st=0;const DUR=4000;rb.addEventListener("click",()=>{st=0;});
+      function d(now){if(!st)st=now;const el=now-st,pg=Math.min(el/DUR,1);const{x,W,H}=sc(cv);
+        x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);const cW=W/3,iS=Math.min(cW-24,H-60),iY=(H-iS)/2;
+        // GT flash
+        if(gi.complete&&gi.naturalWidth>0){let a;if(pg<.08)a=pg/.08;else if(pg<.2)a=1;else if(pg<.35)a=1-(pg-.2)/.15;else a=0;if(a>0){x.globalAlpha=a*.9;x.drawImage(gi,(cW-iS)/2,iY,iS,iS);x.globalAlpha=1;}}
+        x.fillStyle=`rgba(255,255,255,${pg<.3?.5:.15})`;x.font="10px 'DM Sans',sans-serif";x.textAlign="center";x.fillText("STIMULUS",cW/2,iY+iS+16);
+        // Waveforms
+        if(pg>.06){const wg=Math.min((pg-.06)/.65,1),wX=cW+8,wW=cW-16,nC=8,cH=(H-16)/nC;
+          for(let c=0;c<nC;c++){const dd=wp[c],yC=8+cH*c+cH/2,a=cH/2-2,dW=Math.floor(wW*wg);
+            x.strokeStyle=chC[c];x.lineWidth=1.1;x.globalAlpha=.8;x.beginPath();
+            for(let p=0;p<dW;p++){const tL=(p/wW)*.8,v=es(dd,tL,tL),y=yC+v*a;p===0?x.moveTo(wX+p,y):x.lineTo(wX+p,y);}x.stroke();x.globalAlpha=1;
+            [{px:wW*.125,tL:.1,t:.15,c:"255,220,100"},{px:wW*.2125,tL:.17,t:.23,c:"255,150,80"}].forEach(m=>{
+              if(wg>m.t-.02){const pv=es(dd,m.tL,m.tL),py=yC+pv*a,gi2=Math.exp(-Math.pow((wg-m.t)/.08,2));
+                if(gi2>.1){const g=x.createRadialGradient(wX+m.px,py,0,wX+m.px,py,14);g.addColorStop(0,`rgba(${m.c},${gi2*.7})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(wX+m.px-14,py-14,28,28);}}
+            });
+          }
+          [{px:wX+wW*.125,l:"P100",c:"255,220,100",t:.12},{px:wX+wW*.2125,l:"N170",c:"255,150,80",t:.2}].forEach(m=>{if(wg>m.t){x.strokeStyle=`rgba(${m.c},.3)`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,4);x.lineTo(m.px,H-12);x.stroke();x.setLineDash([]);x.fillStyle=`rgba(${m.c},.5)`;x.font="8px 'DM Sans',sans-serif";x.textAlign="center";x.fillText(m.l,m.px,H-3);}});
         }
-        drawWaveforms(ctx,W,H,(now-s)/1000,params,names,colors);
-        requestAnimationFrame(draw);
-      } requestAnimationFrame(draw);
+        // Reconstruction
+        if(pg>.3&&ri.complete&&ri.naturalWidth>0){const rp=Math.min((pg-.3)/.5,1),rX=cW*2+(cW-iS)/2;x.globalAlpha=rp;if(rp<1)x.filter=`blur(${(1-rp)*12}px)`;x.drawImage(ri,rX,iY,iS,iS);x.filter="none";x.globalAlpha=1;
+          if(rp>.6){const sa=(rp-.6)/.4;x.fillStyle=`rgba(255,255,255,${sa*.7})`;x.font=`bold 13px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(`CLIP: ${(0.797*Math.min(1,(rp-.6)/.3)).toFixed(3)}`,rX+iS/2,iY+iS+16);}}
+        x.fillStyle=`rgba(255,255,255,${pg>.5?.2:.1})`;x.font="10px 'DM Sans',sans-serif";x.textAlign="center";x.fillText("RECONSTRUCTION",cW*2+cW/2,iY-8);x.textAlign="start";
+        td.textContent=`${Math.round(pg*800)} ms`;if(pg>=1&&el>DUR+1500)st=0;requestAnimationFrame(d);}requestAnimationFrame(d);
     })();
 
-    // ===== OPTION E: Cinematic Sequence =====
-    (function(){
-      const canvas = document.getElementById('canvasE');
-      const replayBtn = document.getElementById('replayBtn');
-      const timeDisplay = document.getElementById('cinemaTime');
-      const gtImg = new Image(); gtImg.crossOrigin="anonymous";
-      gtImg.src = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png";
-      const reconImg = new Image(); reconImg.crossOrigin="anonymous";
-      reconImg.src = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png";
-      let startTime=0;
-      const DUR=4000;
-      replayBtn.addEventListener("click",()=>{startTime=0;});
-
-      function draw(now) {
-        if(!startTime)startTime=now;
-        const elapsed=now-startTime, prog=Math.min(elapsed/DUR,1);
-        const {ctx,W,H}=setupCanvas(canvas);
-        ctx.fillStyle="#1a1a2e"; ctx.fillRect(0,0,W,H);
-        const colW=W/3, imgS=Math.min(colW-30,H-80), imgY=(H-imgS)/2;
-
-        // Phase 1: GT flash
-        if(gtImg.complete && gtImg.naturalWidth>0) {
-          let a; if(prog<.08) a=prog/.08; else if(prog<.2) a=1; else if(prog<.35) a=1-(prog-.2)/.15; else a=0;
-          if(a>0) { ctx.globalAlpha=a*.9; ctx.drawImage(gtImg,(colW-imgS)/2,imgY,imgS,imgS); ctx.globalAlpha=1; }
-        }
-        ctx.fillStyle=`rgba(255,255,255,${prog<.3?.5:.15})`; ctx.font="11px 'DM Sans',sans-serif";
-        ctx.textAlign="center"; ctx.fillText("STIMULUS",colW/2,imgY+imgS+20);
-
-        // Phase 2: Waveforms with glowing peaks
-        if(prog>.06) {
-          const wp=Math.min((prog-.06)/.65,1), wX=colW+10, wW=colW-20, nCh=8, cH=(H-20)/nCh;
-          for(let ch=0;ch<nCh;ch++) {
-            const d=waveParams[ch], yC=10+cH*ch+cH/2, amp=cH/2-2;
-            const drawW=Math.floor(wW*wp);
-            ctx.strokeStyle=chColors[ch]; ctx.lineWidth=1.2; ctx.globalAlpha=.8; ctx.beginPath();
-            for(let px=0;px<drawW;px++) {
-              const tL=(px/wW)*.8, v=eegSig(d,tL,tL), y=yC+v*amp;
-              px===0?ctx.moveTo(wX+px,y):ctx.lineTo(wX+px,y);
-            } ctx.stroke(); ctx.globalAlpha=1;
-            // Glow at P100
-            if(wp>.12) {
-              const pkX=wX+wW*.125, pkL=.1, pkV=eegSig(d,pkL,pkL), pkY=yC+pkV*amp;
-              const gi=Math.exp(-Math.pow((wp-.15)/.08,2));
-              if(gi>.1) { const g=ctx.createRadialGradient(pkX,pkY,0,pkX,pkY,18);
-                g.addColorStop(0,`rgba(255,220,100,${gi*.7})`); g.addColorStop(1,"rgba(255,220,100,0)");
-                ctx.fillStyle=g; ctx.fillRect(pkX-18,pkY-18,36,36); }
-            }
-            // Glow at N170
-            if(wp>.2) {
-              const nkX=wX+wW*.2125, nkL=.17, nkV=eegSig(d,nkL,nkL), nkY=yC+nkV*amp;
-              const gi2=Math.exp(-Math.pow((wp-.23)/.08,2));
-              if(gi2>.1) { const g2=ctx.createRadialGradient(nkX,nkY,0,nkX,nkY,18);
-                g2.addColorStop(0,`rgba(255,150,80,${gi2*.6})`); g2.addColorStop(1,"rgba(255,150,80,0)");
-                ctx.fillStyle=g2; ctx.fillRect(nkX-18,nkY-18,36,36); }
-            }
-          }
-          // Markers
-          [{x:wX+wW*.125,l:"P100",c:"255,220,100",t:.12},{x:wX+wW*.2125,l:"N170",c:"255,150,80",t:.2}].forEach(m=>{
-            if(wp>m.t) { ctx.strokeStyle=`rgba(${m.c},.3)`; ctx.lineWidth=1; ctx.setLineDash([2,2]);
-              ctx.beginPath(); ctx.moveTo(m.x,5); ctx.lineTo(m.x,H-15); ctx.stroke(); ctx.setLineDash([]);
-              ctx.fillStyle=`rgba(${m.c},.5)`; ctx.font="9px 'DM Sans',sans-serif";
-              ctx.textAlign="center"; ctx.fillText(m.l,m.x,H-5); }
-          });
-        }
-
-        // Phase 3: Reconstruction emerges
-        if(prog>.3 && reconImg.complete && reconImg.naturalWidth>0) {
-          const rp=Math.min((prog-.3)/.5,1), rX=colW*2+(colW-imgS)/2;
-          ctx.globalAlpha=rp;
-          if(rp<1) ctx.filter=`blur(${(1-rp)*12}px)`;
-          ctx.drawImage(reconImg,rX,imgY,imgS,imgS);
-          ctx.filter="none"; ctx.globalAlpha=1;
-          if(rp>.6) {
-            const sa=(rp-.6)/.4; ctx.fillStyle=`rgba(255,255,255,${sa*.7})`;
-            ctx.font=`bold 14px "DM Sans",sans-serif`; ctx.textAlign="center";
-            ctx.fillText(`CLIP: ${(0.797*Math.min(1,(rp-.6)/.3)).toFixed(3)}`,rX+imgS/2,imgY+imgS+20);
-          }
-        }
-        ctx.fillStyle=`rgba(255,255,255,${prog>.5?.2:.1})`; ctx.font="11px 'DM Sans',sans-serif";
-        ctx.textAlign="center"; ctx.fillText("RECONSTRUCTION",colW*2+colW/2,imgY-10);
-        ctx.textAlign="start";
-        timeDisplay.textContent=`${Math.round(prog*800)} ms`;
-        if(prog>=1 && elapsed>DUR+1500) startTime=0;
-        requestAnimationFrame(draw);
-      } requestAnimationFrame(draw);
-    })();
-
-    // ===== OPTION F: 3D Rotating Brain =====
-    (function(){
-      const container = document.getElementById('brain3d');
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 1000);
-      camera.position.set(0, 0, 2.8);
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setClearColor(0x0a0a14);
-      container.appendChild(renderer.domElement);
-
-      // Brain sphere (translucent)
-      const brainGeo = new THREE.SphereGeometry(1, 48, 48);
-      const brainMat = new THREE.MeshPhongMaterial({
-        color: 0x334455, transparent: true, opacity: 0.15,
-        shininess: 30, side: THREE.DoubleSide
-      });
-      const brain = new THREE.Mesh(brainGeo, brainMat);
-      scene.add(brain);
-
-      // Wireframe
-      const wireGeo = new THREE.SphereGeometry(1.005, 24, 24);
-      const wireMat = new THREE.MeshBasicMaterial({ color: 0x445566, wireframe: true, transparent: true, opacity: 0.08 });
-      scene.add(new THREE.Mesh(wireGeo, wireMat));
-
-      // Electrode positions on sphere (simplified 10-10 layout)
-      const allElectrodes = [];
-      Object.entries(regions).forEach(([name, region]) => {
-        region.electrodes.forEach(e => {
-          // Map 2D head coords to 3D sphere
-          const nx = (e.x - 150) / 130;
-          const ny = -(e.y - 165) / 130;
-          const nz = Math.sqrt(Math.max(0, 1 - nx*nx - ny*ny));
-          allElectrodes.push({ name: e.name, region: name, pos: new THREE.Vector3(nx, ny, nz) });
-        });
-      });
-
-      // Create electrode meshes
-      const electrodeMeshes = allElectrodes.map(e => {
-        const geo = new THREE.SphereGeometry(0.04, 12, 12);
-        const mat = new THREE.MeshPhongMaterial({
-          color: e.region === "Visual Cortex" ? 0xffcc56 : 0x667788,
-          emissive: e.region === "Visual Cortex" ? 0x664400 : 0x111122,
-          emissiveIntensity: 0.3
-        });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.copy(e.pos.clone().multiplyScalar(1.02));
-        mesh.userData = e;
-        scene.add(mesh);
-
-        // Glow sprite for visual cortex
-        if (e.region === "Visual Cortex") {
-          const spriteMat = new THREE.SpriteMaterial({
-            color: 0xffaa00, transparent: true, opacity: 0.3,
-            blending: THREE.AdditiveBlending
-          });
-          const sprite = new THREE.Sprite(spriteMat);
-          sprite.scale.set(0.15, 0.15, 1);
-          sprite.position.copy(mesh.position);
-          scene.add(sprite);
-          mesh.userData.sprite = sprite;
-        }
-        return mesh;
-      });
-
-      // Lights
-      scene.add(new THREE.AmbientLight(0x444466, 0.6));
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(2, 3, 4); scene.add(dirLight);
-      const backLight = new THREE.DirectionalLight(0x4466aa, 0.3);
-      backLight.position.set(-2, -1, -3); scene.add(backLight);
-
-      // Mouse drag rotation
-      let isDragging = false, prevX = 0, prevY = 0;
-      let rotX = 0, rotY = 0;
-      container.addEventListener("mousedown", e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
-      window.addEventListener("mouseup", () => isDragging = false);
-      window.addEventListener("mousemove", e => {
-        if (!isDragging) return;
-        rotY += (e.clientX - prevX) * 0.005;
-        rotX += (e.clientY - prevY) * 0.005;
-        prevX = e.clientX; prevY = e.clientY;
-      });
-
-      function animate(now) {
-        const t = now / 1000;
-        // Auto-rotate slowly
-        brain.rotation.y = t * 0.15 + rotY;
-        brain.rotation.x = Math.sin(t * 0.08) * 0.1 + rotX;
-        // Apply same rotation to all children
-        scene.children.forEach(c => {
-          if (c !== brain && c.type !== "Light" && c.type !== "AmbientLight") {
-            c.rotation.copy(brain.rotation);
-          }
-        });
-
-        // Pulse visual cortex electrodes
-        electrodeMeshes.forEach(mesh => {
-          if (mesh.userData.region === "Visual Cortex") {
-            const pulse = 0.5 + Math.sin(t * 3 + mesh.position.x * 5) * 0.5;
-            mesh.material.emissiveIntensity = 0.3 + pulse * 0.7;
-            if (mesh.userData.sprite) {
-              mesh.userData.sprite.material.opacity = 0.1 + pulse * 0.4;
-              const s = 0.12 + pulse * 0.1;
-              mesh.userData.sprite.scale.set(s, s, 1);
-            }
-          }
-        });
-
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      requestAnimationFrame(animate);
-
-      // Resize handler
-      window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-      });
+    // F: 3D Brain
+    (function(){const ct=document.getElementById('brain3d');
+      const sc2=new THREE.Scene(),cam=new THREE.PerspectiveCamera(50,ct.clientWidth/ct.clientHeight,.1,1000);cam.position.set(0,0,2.8);
+      const ren=new THREE.WebGLRenderer({antialias:true,alpha:false});ren.setSize(ct.clientWidth,ct.clientHeight);ren.setPixelRatio(window.devicePixelRatio);ren.setClearColor(0x0a0a14);ct.appendChild(ren.domElement);
+      const bg=new THREE.SphereGeometry(1,48,48),bm=new THREE.MeshPhongMaterial({color:0x334455,transparent:true,opacity:.15,shininess:30,side:THREE.DoubleSide});
+      const brain=new THREE.Mesh(bg,bm);sc2.add(brain);
+      const wg=new THREE.SphereGeometry(1.005,24,24),wm=new THREE.MeshBasicMaterial({color:0x445566,wireframe:true,transparent:true,opacity:.08});sc2.add(new THREE.Mesh(wg,wm));
+      const allE=[];Object.entries(regions).forEach(([name,reg])=>{reg.electrodes.forEach(e=>{const nx=(e.x-150)/130,ny=-(e.y-165)/130,nz=Math.sqrt(Math.max(0,1-nx*nx-ny*ny));allE.push({name:e.n,region:name,pos:new THREE.Vector3(nx,ny,nz)});});});
+      const ems=allE.map(e=>{const g=new THREE.SphereGeometry(.04,12,12),m=new THREE.MeshPhongMaterial({color:e.region==="Visual Cortex"?0xffcc56:0x667788,emissive:e.region==="Visual Cortex"?0x664400:0x111122,emissiveIntensity:.3});const ms=new THREE.Mesh(g,m);ms.position.copy(e.pos.clone().multiplyScalar(1.02));ms.userData=e;sc2.add(ms);
+        if(e.region==="Visual Cortex"){const sm=new THREE.SpriteMaterial({color:0xffaa00,transparent:true,opacity:.3,blending:THREE.AdditiveBlending});const sp=new THREE.Sprite(sm);sp.scale.set(.15,.15,1);sp.position.copy(ms.position);sc2.add(sp);ms.userData.sprite=sp;}return ms;});
+      sc2.add(new THREE.AmbientLight(0x444466,.6));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(2,3,4);sc2.add(dl);const bl=new THREE.DirectionalLight(0x4466aa,.3);bl.position.set(-2,-1,-3);sc2.add(bl);
+      let isDrag=false,pX=0,pY=0,rX=0,rY=0;
+      ct.addEventListener("mousedown",e=>{isDrag=true;pX=e.clientX;pY=e.clientY;});window.addEventListener("mouseup",()=>isDrag=false);
+      window.addEventListener("mousemove",e=>{if(!isDrag)return;rY+=(e.clientX-pX)*.005;rX+=(e.clientY-pY)*.005;pX=e.clientX;pY=e.clientY;});
+      function anim(now){const t=now/1000;brain.rotation.y=t*.15+rY;brain.rotation.x=Math.sin(t*.08)*.1+rX;
+        sc2.children.forEach(c=>{if(c!==brain&&c.type!=="Light"&&c.type!=="AmbientLight")c.rotation.copy(brain.rotation);});
+        ems.forEach(m=>{if(m.userData.region==="Visual Cortex"){const p=.5+Math.sin(t*3+m.position.x*5)*.5;m.material.emissiveIntensity=.3+p*.7;if(m.userData.sprite){m.userData.sprite.material.opacity=.1+p*.4;const s=.12+p*.1;m.userData.sprite.scale.set(s,s,1);}}});
+        ren.render(sc2,cam);requestAnimationFrame(anim);}requestAnimationFrame(anim);
+      window.addEventListener('resize',()=>{cam.aspect=ct.clientWidth/ct.clientHeight;cam.updateProjectionMatrix();ren.setSize(ct.clientWidth,ct.clientHeight);});
     })();
   </script>
-
 </body>
 </html>
