@@ -105,7 +105,18 @@
       </div>
 
       <h2>Demo</h2>
-      <p>Select a sample below to watch the brain response unfold. The visual cortex waveform replays in slow motion as the subject views the image.</p>
+      <p>
+        Select a sample to watch the visual cortex respond in real time.
+        The waveform shows 8 electrodes over the back of the head, where
+        the brain processes vision. Two key moments are marked:
+      </p>
+      <ul>
+        <li><strong>P100</strong> (~100ms) &mdash; The first major response.
+          The brain detects basic visual features: edges, contrast, spatial layout.</li>
+        <li><strong>N170</strong> (~170ms) &mdash; The brain recognizes
+          <em>what</em> the object is. This is the signal the model relies on most
+          for reconstruction.</li>
+      </ul>
 
       <div class="sample-nav" id="sampleNav"></div>
 
@@ -132,7 +143,12 @@
       </div>
 
       <h2>Explore the Full Brain Response</h2>
-      <p>The model uses all 63 EEG channels as input. Click any electrode on the head map to see that channel's recorded signal.</p>
+      <p>
+        The demo above highlights the visual cortex because that's where
+        the strongest image-related signals originate. But the model uses all 63
+        EEG channels as input &mdash; signals from across the entire scalp contribute
+        to the reconstruction. Click any electrode below to see its signal.
+      </p>
 
       <div class="explorer-card">
         <div class="explorer-layout">
@@ -311,26 +327,19 @@
       });
       x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
 
-      // ---- Explorer canvas ----
+      // ---- Explorer canvas (clean, no markers) ----
       const rc2=cvExp.getBoundingClientRect();cvExp.width=rc2.width*dpr;cvExp.height=rc2.height*dpr;
       const x2=cvExp.getContext('2d');x2.scale(dpr,dpr);const W2=rc2.width,H2=rc2.height;
       const d2=chParams[activeElectrode];
       if(d2){
-        const eCh=ALL_CH.find(c=>c.n===activeElectrode);const isVC=eCh&&eCh.r==="Visual Cortex";const col2=eCh?RC[eCh.r]:"#888";
+        const eCh=ALL_CH.find(c=>c.n===activeElectrode);const col2=eCh?RC[eCh.r]:"#888";
         x2.fillStyle="#1a1a2e";x2.fillRect(0,0,W2,H2);const yC2=H2/2,a2=H2/2-16;
         x2.strokeStyle="rgba(255,255,255,0.04)";x2.lineWidth=.5;x2.beginPath();x2.moveTo(0,yC2);x2.lineTo(W2,yC2);x2.stroke();
         x2.strokeStyle=col2;x2.lineWidth=2;x2.beginPath();
         for(let p=0;p<W2;p++){const tL=(p/W2)*.8,v=es(d2,tL),y=yC2+v*a2;p===0?x2.moveTo(p,y):x2.lineTo(p,y);}
         x2.stroke();x2.lineTo(W2,yC2);x2.lineTo(0,yC2);x2.closePath();x2.globalAlpha=.08;x2.fillStyle=col2;x2.fill();x2.globalAlpha=1;
-        if(isVC){const gp=(elapsed/1000%3)/3;
-          [{px:W2*.125,tL:.1,t:.3,c:"255,220,100",l:"P100"},{px:W2*.2125,tL:.17,t:.6,c:"255,150,80",l:"N170"}].forEach(m=>{
-            const pv=es(d2,m.tL),py=yC2+pv*a2,gi=Math.exp(-Math.pow((gp-m.t)/.12,2));
-            if(gi>.05){const g=x2.createRadialGradient(m.px,py,0,m.px,py,20);g.addColorStop(0,`rgba(${m.c},${gi*.6})`);g.addColorStop(1,`rgba(${m.c},0)`);x2.fillStyle=g;x2.fillRect(m.px-20,py-20,40,40);}
-            x2.strokeStyle=`rgba(${m.c},${.12+gi*.3})`;x2.lineWidth=1;x2.setLineDash([2,2]);x2.beginPath();x2.moveTo(m.px,0);x2.lineTo(m.px,H2);x2.stroke();x2.setLineDash([]);
-            x2.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x2.font=`bold 9px "DM Sans",sans-serif`;x2.textAlign="center";x2.fillText(m.l,m.px,12);x2.textAlign="start";
-          });
-        }
         x2.fillStyle="rgba(255,255,255,0.35)";x2.font=`11px "DM Sans",sans-serif`;x2.fillText(activeElectrode,6,16);
+        if(eCh){x2.fillStyle="rgba(255,255,255,0.15)";x2.font=`9px "DM Sans",sans-serif`;x2.fillText(eCh.r,6,28);}
         x2.fillStyle="rgba(255,255,255,0.15)";x2.font=`8px "DM Sans",sans-serif`;x2.fillText("0ms",4,H2-3);x2.textAlign="end";x2.fillText("800ms",W2-4,H2-3);x2.textAlign="start";
       }
 
