@@ -226,7 +226,7 @@
     function getSignal(sampleIdx, chIdx, frac) {
       if (!eegData) return 0;
       const s = samples[currentSample];
-      const data = eegData.samples[s.idx];
+      const data = eegData.samples[String(parseInt(s.idx))];
       if (!data || !data[chIdx]) return 0;
       const arr = data[chIdx];
       const pos = frac * (arr.length - 1);
@@ -246,8 +246,8 @@
     // Find max amplitude across a sample for normalization
     function getMaxAmp(sampleIdx) {
       const s = samples[sampleIdx];
-      if (!eegData || !eegData.samples[s.idx]) return 1;
-      const data = eegData.samples[s.idx];
+      if (!eegData || !eegData.samples[String(parseInt(s.idx))]) return 1;
+      const data = eegData.samples[String(parseInt(s.idx))];
       let max = 0;
       for (let ch = 0; ch < data.length; ch++) {
         for (let i = 0; i < data[ch].length; i++) {
