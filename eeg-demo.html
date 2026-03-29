@@ -218,13 +218,44 @@
     const RC={"Frontal":"#cc9988","Frontal-Central":"#bb8899","Central-Temporal":"#aa99cc","Centro-Parietal":"#88aacc","Parietal":"#88bbdd","Visual Cortex":"#ffcc56"};
     const vcChannels = ALL_CH.filter(c=>c.r==="Visual Cortex");
 
-    // ===== Signal generation =====
-    function sr(seed){let s=seed;return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};}
-    const chParams={};
-    ALL_CH.forEach((ch,i)=>{const rng=sr(124*137+i*53);const isV=ch.r==="Visual Cortex",isP=ch.r==="Parietal"||ch.r==="Centro-Parietal";const a=isV?1:isP?.6:.3;
-      chParams[ch.n]={tA:(.1+rng()*.3)*a,tF:4+rng()*4,aA:(.2+rng()*.4)*a,aF:8+rng()*5,bA:(.05+rng()*.2)*a,bF:13+rng()*17,gA:(.02+rng()*.1)*a,gF:30+rng()*30,ph:rng()*Math.PI*2,nL:.06+rng()*.1,p1:(.1+rng()*.4)*a,n1:(.08+rng()*.3)*a};
-    });
-    function es(d,tL){let v=d.tA*Math.sin(2*Math.PI*d.tF*tL+d.ph)+d.aA*Math.sin(2*Math.PI*d.aF*tL+d.ph*1.3)+d.bA*Math.sin(2*Math.PI*d.bF*tL+d.ph*.7)+d.gA*Math.sin(2*Math.PI*d.gF*tL+d.ph*2.1);v+=d.p1*Math.exp(-Math.pow((tL-.1)/.02,2))*Math.sin(2*Math.PI*10*tL);v-=d.n1*Math.exp(-Math.pow((tL-.17)/.025,2))*Math.sin(2*Math.PI*8*tL);return Math.max(-1,Math.min(1,v/1.5));}
+    // ===== Real EEG data =====
+    let eegData = null; // loaded async
+    let chNames = []; // channel name order from JSON
+
+    // Interpolate real data: given channel index and fractional position (0-1), return value
+    function getSignal(sampleIdx, chIdx, frac) {
+      if (!eegData) return 0;
+      const s = samples[currentSample];
+      const data = eegData.samples[s.idx];
+      if (!data || !data[chIdx]) return 0;
+      const arr = data[chIdx];
+      const pos = frac * (arr.length - 1);
+      const i = Math.floor(pos);
+      const t = pos - i;
+      if (i >= arr.length - 1) return arr[arr.length - 1];
+      return arr[i] * (1 - t) + arr[i + 1] * t;
+    }
+
+    // Get signal by channel name
+    function getSignalByName(chName, frac) {
+      const idx = chNames.indexOf(chName);
+      if (idx === -1) return 0;
+      return getSignal(currentSample, idx, frac);
+    }
+
+    // Find max amplitude across a sample for normalization
+    function getMaxAmp(sampleIdx) {
+      const s = samples[sampleIdx];
+      if (!eegData || !eegData.samples[s.idx]) return 1;
+      const data = eegData.samples[s.idx];
+      let max = 0;
+      for (let ch = 0; ch < data.length; ch++) {
+        for (let i = 0; i < data[ch].length; i++) {
+          max = Math.max(max, Math.abs(data[ch][i]));
+        }
+      }
+      return max || 1;
+    }
 
     function scoreColor(s){return s>=.7?"#2d8a4e":s>=.5?"#b58a1b":"#c0392b";}
 
@@ -295,13 +326,15 @@
 
     // ===== Main draw loop =====
     function draw(now){
+      if(!eegData){requestAnimationFrame(draw);return;}
       if(!playbackStart)playbackStart=now;
       const elapsed=now-playbackStart;
       const cyclePos=elapsed%(PLAY_DUR+PAUSE_DUR);
       const prog=Math.min(cyclePos/PLAY_DUR,1);
       timeLabel.textContent=prog<1?`${Math.round(prog*800)} ms`:'800 ms';
+      const maxAmp=getMaxAmp(currentSample);
 
-      // ---- Playback canvas ----
+      // ---- Playback canvas (visual cortex, real data) ----
       const dpr=window.devicePixelRatio||1;
       const rc=cv.getBoundingClientRect();cv.width=rc.width*dpr;cv.height=rc.height*dpr;
       const x=cv.getContext('2d');x.scale(dpr,dpr);const W=rc.width,H=rc.height;
@@ -310,16 +343,18 @@
       const drawLimit=Math.floor(W*prog);
 
       for(let i=0;i<n;i++){
-        const ch=vcChannels[i],d=chParams[ch.n];if(!d)continue;
+        const ch=vcChannels[i];
+        const chIdx=chNames.indexOf(ch.n);if(chIdx===-1)continue;
         const yC=cH*i+cH/2,a=cH/2-2;
         x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;x.beginPath();x.moveTo(0,cH*(i+1));x.lineTo(W,cH*(i+1));x.stroke();
         x.fillStyle="rgba(255,255,255,0.3)";x.font=`${Math.max(7,Math.min(10,cH*.4))}px "DM Sans",sans-serif`;x.fillText(ch.n,4,yC-a+Math.max(8,cH*.35));
         x.strokeStyle=RC["Visual Cortex"];x.lineWidth=1.2;x.beginPath();
-        for(let p=0;p<drawLimit;p++){const tL=(p/W)*.8,v=es(d,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
+        for(let p=0;p<drawLimit;p++){const frac=p/W;const v=getSignal(currentSample,chIdx,frac)/maxAmp;const y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
         x.stroke();
-        [{px:W*.125,tL:.1,c:"255,220,100"},{px:W*.2125,tL:.17,c:"255,150,80"}].forEach(m=>{
+        [{px:W*.125,frac:.125,c:"255,220,100"},{px:W*.2125,frac:.2125,c:"255,150,80"}].forEach(m=>{
           if(drawLimit>m.px){const dist=Math.abs(drawLimit-m.px)/W,gi=Math.exp(-Math.pow(dist/.04,2));
-            if(gi>.05){const pv=es(d,m.tL),py=yC+pv*a,g=x.createRadialGradient(m.px,py,0,m.px,py,14);g.addColorStop(0,`rgba(${m.c},${gi*.7})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-14,py-14,28,28);}}
+            if(gi>.05){const pv=getSignal(currentSample,chIdx,m.frac)/maxAmp,py=yC+pv*a;
+              const g=x.createRadialGradient(m.px,py,0,m.px,py,14);g.addColorStop(0,`rgba(${m.c},${gi*.7})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-14,py-14,28,28);}}
         });
       }
       if(prog<1){x.strokeStyle="rgba(255,255,255,0.4)";x.lineWidth=1;x.beginPath();x.moveTo(drawLimit,0);x.lineTo(drawLimit,H);x.stroke();
@@ -330,16 +365,16 @@
       });
       x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
 
-      // ---- Explorer canvas ----
+      // ---- Explorer canvas (single electrode, real data) ----
       const rc2=cvExp.getBoundingClientRect();cvExp.width=rc2.width*dpr;cvExp.height=rc2.height*dpr;
       const x2=cvExp.getContext('2d');x2.scale(dpr,dpr);const W2=rc2.width,H2=rc2.height;
-      const d2=chParams[activeElectrode];
-      if(d2){
-        const eCh=ALL_CH.find(c=>c.n===activeElectrode);const isVC=eCh&&eCh.r==="Visual Cortex";const col2=eCh?RC[eCh.r]:"#888";
+      const eChIdx=chNames.indexOf(activeElectrode);
+      if(eChIdx!==-1){
+        const eCh=ALL_CH.find(c=>c.n===activeElectrode);const col2=eCh?RC[eCh.r]:"#888";
         x2.fillStyle="#1a1a2e";x2.fillRect(0,0,W2,H2);const yC2=H2/2,a2=H2/2-16;
         x2.strokeStyle="rgba(255,255,255,0.04)";x2.lineWidth=.5;x2.beginPath();x2.moveTo(0,yC2);x2.lineTo(W2,yC2);x2.stroke();
         x2.strokeStyle=col2;x2.lineWidth=2;x2.beginPath();
-        for(let p=0;p<W2;p++){const tL=(p/W2)*.8,v=es(d2,tL),y=yC2+v*a2;p===0?x2.moveTo(p,y):x2.lineTo(p,y);}
+        for(let p=0;p<W2;p++){const frac=p/W2;const v=getSignal(currentSample,eChIdx,frac)/maxAmp;const y=yC2+v*a2;p===0?x2.moveTo(p,y):x2.lineTo(p,y);}
         x2.stroke();x2.lineTo(W2,yC2);x2.lineTo(0,yC2);x2.closePath();x2.globalAlpha=.08;x2.fillStyle=col2;x2.fill();x2.globalAlpha=1;
         x2.fillStyle="rgba(255,255,255,0.35)";x2.font=`11px "DM Sans",sans-serif`;x2.fillText(activeElectrode,6,16);
         if(eCh){x2.fillStyle="rgba(255,255,255,0.15)";x2.font=`9px "DM Sans",sans-serif`;x2.fillText(eCh.r,6,28);}
@@ -348,7 +383,15 @@
 
       requestAnimationFrame(draw);
     }
-    requestAnimationFrame(draw);
+
+    // Load real EEG data then start rendering
+    fetch("https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/eeg_data.json")
+      .then(r=>r.json())
+      .then(data=>{
+        eegData=data;
+        chNames=data.ch_names;
+        requestAnimationFrame(draw);
+      });
   </script>
 
 </body>
