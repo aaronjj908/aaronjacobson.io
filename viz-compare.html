@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EEG Visualization — Interaction Comparison</title>
+  <title>EEG Visualization — 63 Channel Comparison</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,50 +22,28 @@
     .score-bar-bg { flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
     .score-bar-fill { height: 100%; border-radius: 3px; background: #2d8a4e; }
     .score-value { font-size: 0.85rem; font-weight: 600; color: #222; font-variant-numeric: tabular-nums; min-width: 3rem; text-align: right; }
-    .brain-canvas { width: 100%; height: 100%; min-height: 220px; display: block; border-radius: 4px; }
+    .brain-canvas { width: 100%; display: block; border-radius: 4px; }
 
-    /* Region pill buttons */
-    .region-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
-    .region-pill { background: none; border: 1px solid #ddd; border-radius: 100px; padding: 0.25rem 0.7rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.72rem; color: #888; cursor: pointer; transition: all 0.2s; }
+    /* Region pills */
+    .region-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .region-pill { background: none; border: 1px solid #ddd; border-radius: 100px; padding: 0.2rem 0.6rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.68rem; color: #888; cursor: pointer; transition: all 0.2s; }
     .region-pill:hover { border-color: #aaa; color: #444; }
     .region-pill.active { background: #222; border-color: #222; color: #fff; }
 
-    /* Expandable panel */
-    .expand-trigger { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; background: none; border: none; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.78rem; color: #888; cursor: pointer; padding: 0.3rem 0; transition: color 0.2s; }
-    .expand-trigger:hover { color: #444; }
-    .expand-trigger .arrow { transition: transform 0.3s; font-size: 0.65rem; }
-    .expand-trigger.open .arrow { transform: rotate(180deg); }
-    .expand-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; }
-    .expand-panel.open { max-height: 400px; opacity: 1; }
-    .expand-inner { display: grid; grid-template-columns: 200px 1fr; gap: 0.75rem; padding: 0.75rem 0 0; align-items: center; }
-    .expand-inner svg { width: 100%; }
-    .expand-wave-panel { background: #1a1a2e; border-radius: 4px; padding: 0.5rem; }
-    .expand-wave-panel .rl { color: rgba(255,255,255,0.4); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
-    .expand-wave-panel canvas { width: 100%; height: 160px; }
-
-    /* Modal overlay */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-    .modal-overlay.open { display: flex; }
-    .modal-box { background: #fff; border-radius: 12px; padding: 1.5rem; max-width: 560px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .modal-header h3 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 1.2rem; }
-    .modal-close { background: none; border: none; font-size: 1.2rem; color: #999; cursor: pointer; padding: 0.25rem; }
-    .modal-close:hover { color: #222; }
-    .modal-content { display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: start; }
-    .modal-content svg { width: 100%; }
-    .modal-wave { background: #1a1a2e; border-radius: 6px; padding: 0.75rem; }
-    .modal-wave .rl { color: rgba(255,255,255,0.4); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
-    .modal-wave canvas { width: 100%; height: 200px; }
-    .explore-btn { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; background: none; border: 1px solid #ddd; border-radius: 100px; padding: 0.3rem 0.8rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.75rem; color: #888; cursor: pointer; transition: all 0.2s; }
-    .explore-btn:hover { border-color: #aaa; color: #444; }
-
+    /* Head map for option 2 */
+    .headmap-inline { display: grid; grid-template-columns: 180px 1fr; gap: 0; border-radius: 4px; overflow: hidden; min-height: 220px; }
+    .headmap-left { display: flex; align-items: center; justify-content: center; padding: 0.5rem; background: #f0eee8; }
+    .headmap-left svg { width: 100%; max-width: 170px; }
+    .headmap-right { background: #1a1a2e; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; justify-content: center; }
+    .headmap-right .rl { color: rgba(255,255,255,0.4); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+    .headmap-right canvas { width: 100%; height: 220px; }
     .electrode-dot { cursor: pointer; transition: all 0.15s; }
+    .electrode-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 6px; fill: #bbb; pointer-events: none; text-anchor: middle; }
     .region-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 8px; fill: #999; pointer-events: none; }
 
     @media (max-width: 600px) {
       .demo-pipeline { grid-template-columns: 1fr; gap: 1.25rem; }
-      .expand-inner { grid-template-columns: 1fr; }
-      .modal-content { grid-template-columns: 1fr; }
+      .headmap-inline { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -79,20 +57,20 @@
 
 <main>
   <section class="project-header">
-    <h1>Interaction Patterns</h1>
-    <p class="project-subtitle">Three ways to let visitors explore brain regions, all using the glowing-peaks waveform as the base.</p>
+    <h1>63-Channel Comparison</h1>
+    <p class="project-subtitle">Testing with all 63 EEG channels to see if it gets cluttered.</p>
   </section>
   <hr>
 
-  <!-- ===== OPTION 1: Tab pills ===== -->
+  <!-- OPTION 1: Tabs with all 63 channels -->
   <section class="viz-section">
-    <h2>1: Region Tabs</h2>
-    <p>Small pill buttons under the waveform. Click to switch regions. Visual cortex is default. Minimal and clean.</p>
+    <h2>1: Region Tabs — All 63 Channels</h2>
+    <p>Tabs switch between regions. Each region shows ALL its channels stacked. Visual cortex = 8 channels, Frontal = 15, etc.</p>
     <div class="demo-card">
       <div class="demo-pipeline">
         <div class="demo-step">
           <div class="pipeline-label">Brain Activity</div>
-          <canvas class="brain-canvas" id="canvas1"></canvas>
+          <canvas class="brain-canvas" id="canvas1" style="height:280px;"></canvas>
           <div class="region-pills" id="pills1"></div>
         </div>
         <div class="demo-step">
@@ -112,25 +90,21 @@
     </div>
   </section>
 
-  <!-- ===== OPTION 2: Expandable panel ===== -->
+  <!-- OPTION 2: Click individual electrodes -->
   <section class="viz-section">
-    <h2>2: Expandable Panel</h2>
-    <p>Default shows visual cortex. "Explore all regions" expands a panel with the head map below. Click a region to update the main waveform.</p>
+    <h2>2: Click Individual Electrodes</h2>
+    <p>All 63 electrode dots on the head map. Click any one to see that single channel's waveform in detail. Never cluttered.</p>
     <div class="demo-card">
       <div class="demo-pipeline">
         <div class="demo-step">
-          <div class="pipeline-label">Brain Activity &mdash; <span id="expandRegionName">Visual Cortex</span></div>
-          <canvas class="brain-canvas" id="canvas2"></canvas>
-          <button class="expand-trigger" id="expandTrigger">
-            Explore all brain regions <span class="arrow">&#9660;</span>
-          </button>
-          <div class="expand-panel" id="expandPanel">
-            <div class="expand-inner">
+          <div class="pipeline-label">Brain Activity</div>
+          <div class="headmap-inline">
+            <div class="headmap-left">
               <svg viewBox="0 0 300 320" id="headSvg2"></svg>
-              <div class="expand-wave-panel">
-                <div class="rl" id="expandSubLabel">Click a region on the head map</div>
-                <canvas id="canvas2sub" height="160"></canvas>
-              </div>
+            </div>
+            <div class="headmap-right">
+              <div class="rl" id="elecLabel2">Oz</div>
+              <canvas id="canvas2" height="220"></canvas>
             </div>
           </div>
         </div>
@@ -151,194 +125,261 @@
     </div>
   </section>
 
-  <!-- ===== OPTION 3: Modal ===== -->
-  <section class="viz-section">
-    <h2>3: Head Map Modal</h2>
-    <p>Main view stays clean. "Explore regions" button opens an overlay with the interactive head map.</p>
-    <div class="demo-card">
-      <div class="demo-pipeline">
-        <div class="demo-step">
-          <div class="pipeline-label">Brain Activity &mdash; <span id="modalRegionName">Visual Cortex</span></div>
-          <canvas class="brain-canvas" id="canvas3"></canvas>
-          <button class="explore-btn" id="modalOpenBtn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-            Explore brain regions
-          </button>
-        </div>
-        <div class="demo-step">
-          <div class="pipeline-label">AI Reconstruction</div>
-          <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
-        </div>
-        <div class="demo-step">
-          <div class="pipeline-label">Ground Truth</div>
-          <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
-        </div>
-      </div>
-      <div class="score-row">
-        <span class="score-label">CLIP Similarity</span>
-        <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
-        <span class="score-value">0.797</span>
-      </div>
-    </div>
-  </section>
-
 </main>
-
-<!-- Modal -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>Explore Brain Regions</h3>
-      <button class="modal-close" id="modalClose">&times;</button>
-    </div>
-    <div class="modal-content">
-      <svg viewBox="0 0 300 320" id="headSvg3"></svg>
-      <div class="modal-wave">
-        <div class="rl" id="modalWaveLabel">Visual Cortex</div>
-        <canvas id="canvas3modal" height="200"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
 <footer><p><a href="/">Aaron Jacobson</a></p></footer>
 
 <script>
-// ===== Shared EEG =====
-function sr(seed){let s=seed;return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};}
-const chN=["O1","Oz","O2","PO3","POz","PO4","PO7","PO8"];
-const chC=["#6ec6ff","#5eb8ff","#4eaaff","#ff8a80","#ff7070","#a0e87a","#80d860","#ffcc56"];
-const rng=sr(124*137);
-const wp=chN.map(()=>({tA:.2+rng()*.4,tF:4+rng()*4,aA:.3+rng()*.5,aF:8+rng()*5,bA:.1+rng()*.3,bF:13+rng()*17,gA:.05+rng()*.15,gF:30+rng()*30,ph:rng()*Math.PI*2,nL:.08+rng()*.12,p1:.3+rng()*.5,n1:.2+rng()*.4}));
-function es(d,t,tL){let v=d.tA*Math.sin(2*Math.PI*d.tF*t+d.ph)+d.aA*Math.sin(2*Math.PI*d.aF*t+d.ph*1.3)+d.bA*Math.sin(2*Math.PI*d.bF*t+d.ph*.7)+d.gA*Math.sin(2*Math.PI*d.gF*t+d.ph*2.1);v+=d.p1*Math.exp(-Math.pow((tL-.1)/.02,2))*Math.sin(2*Math.PI*10*tL);v-=d.n1*Math.exp(-Math.pow((tL-.17)/.025,2))*Math.sin(2*Math.PI*8*tL);v+=(Math.random()-.5)*d.nL*2;return Math.max(-1,Math.min(1,v/1.5));}
-function sc(c){const d=window.devicePixelRatio||1,rc=c.getBoundingClientRect();c.width=rc.width*d;c.height=rc.height*d;const x=c.getContext('2d');x.scale(d,d);return{x,W:rc.width,H:rc.height};}
+// ===== All 63 channels with positions =====
+const ALL_CHANNELS = [
+  // Frontal-polar
+  {name:"Fp1",x:120,y:42,region:"Frontal"},{name:"Fp2",x:180,y:42,region:"Frontal"},
+  // Anterior-frontal
+  {name:"AF7",x:80,y:60,region:"Frontal"},{name:"AF3",x:125,y:58,region:"Frontal"},{name:"AFz",x:150,y:55,region:"Frontal"},{name:"AF4",x:175,y:58,region:"Frontal"},{name:"AF8",x:220,y:60,region:"Frontal"},
+  // Frontal
+  {name:"F7",x:60,y:90,region:"Frontal"},{name:"F5",x:85,y:88,region:"Frontal"},{name:"F3",x:110,y:86,region:"Frontal"},{name:"F1",x:135,y:84,region:"Frontal"},{name:"F2",x:165,y:84,region:"Frontal"},{name:"F4",x:190,y:86,region:"Frontal"},{name:"F6",x:215,y:88,region:"Frontal"},{name:"F8",x:240,y:90,region:"Frontal"},
+  // Fronto-temporal / Fronto-central
+  {name:"FT9",x:35,y:115,region:"Frontal-Central"},{name:"FT7",x:50,y:112,region:"Frontal-Central"},{name:"FC5",x:75,y:118,region:"Frontal-Central"},{name:"FC3",x:105,y:120,region:"Frontal-Central"},{name:"FC1",x:132,y:122,region:"Frontal-Central"},{name:"FCz",x:150,y:120,region:"Frontal-Central"},{name:"FC2",x:168,y:122,region:"Frontal-Central"},{name:"FC4",x:195,y:120,region:"Frontal-Central"},{name:"FC6",x:225,y:118,region:"Frontal-Central"},{name:"FT8",x:250,y:112,region:"Frontal-Central"},{name:"FT10",x:265,y:115,region:"Frontal-Central"},
+  // Temporal / Central
+  {name:"T7",x:38,y:155,region:"Central-Temporal"},{name:"C5",x:70,y:152,region:"Central-Temporal"},{name:"C3",x:100,y:150,region:"Central-Temporal"},{name:"C1",x:130,y:148,region:"Central-Temporal"},{name:"Cz",x:150,y:147,region:"Central-Temporal"},{name:"C2",x:170,y:148,region:"Central-Temporal"},{name:"C4",x:200,y:150,region:"Central-Temporal"},{name:"C6",x:230,y:152,region:"Central-Temporal"},{name:"T8",x:262,y:155,region:"Central-Temporal"},
+  // Temporal-parietal / Centro-parietal
+  {name:"TP9",x:35,y:190,region:"Centro-Parietal"},{name:"TP7",x:50,y:188,region:"Centro-Parietal"},{name:"CP5",x:78,y:190,region:"Centro-Parietal"},{name:"CP3",x:108,y:192,region:"Centro-Parietal"},{name:"CP1",x:133,y:193,region:"Centro-Parietal"},{name:"CPz",x:150,y:192,region:"Centro-Parietal"},{name:"CP2",x:167,y:193,region:"Centro-Parietal"},{name:"CP4",x:192,y:192,region:"Centro-Parietal"},{name:"CP6",x:222,y:190,region:"Centro-Parietal"},{name:"TP8",x:250,y:188,region:"Centro-Parietal"},{name:"TP10",x:265,y:190,region:"Centro-Parietal"},
+  // Parietal
+  {name:"P7",x:65,y:220,region:"Parietal"},{name:"P5",x:88,y:218,region:"Parietal"},{name:"P3",x:112,y:215,region:"Parietal"},{name:"P1",x:135,y:213,region:"Parietal"},{name:"Pz",x:150,y:212,region:"Parietal"},{name:"P2",x:165,y:213,region:"Parietal"},{name:"P4",x:188,y:215,region:"Parietal"},{name:"P6",x:212,y:218,region:"Parietal"},{name:"P8",x:235,y:220,region:"Parietal"},
+  // Parieto-occipital
+  {name:"PO7",x:88,y:248,region:"Visual Cortex"},{name:"PO3",x:120,y:244,region:"Visual Cortex"},{name:"POz",x:150,y:240,region:"Visual Cortex"},{name:"PO4",x:180,y:244,region:"Visual Cortex"},{name:"PO8",x:212,y:248,region:"Visual Cortex"},
+  // Occipital
+  {name:"O1",x:120,y:270,region:"Visual Cortex"},{name:"Oz",x:150,y:275,region:"Visual Cortex"},{name:"O2",x:180,y:270,region:"Visual Cortex"}
+];
 
-const regions={
-  "Visual Cortex":{color:"#ffcc56",electrodes:[{n:"PO7",x:90,y:245},{n:"PO3",x:120,y:240},{n:"POz",x:150,y:235},{n:"PO4",x:180,y:240},{n:"PO8",x:210,y:245},{n:"O1",x:120,y:270},{n:"Oz",x:150,y:275},{n:"O2",x:180,y:270}]},
-  "Parietal":{color:"#88bbdd",electrodes:[{n:"P7",x:75,y:215},{n:"P3",x:115,y:210},{n:"Pz",x:150,y:205},{n:"P4",x:185,y:210},{n:"P8",x:225,y:215}]},
-  "Central":{color:"#aa99cc",electrodes:[{n:"C3",x:100,y:155},{n:"Cz",x:150,y:145},{n:"C4",x:200,y:155},{n:"T7",x:50,y:155},{n:"T8",x:250,y:155}]},
-  "Frontal":{color:"#cc9988",electrodes:[{n:"Fp1",x:120,y:45},{n:"Fp2",x:180,y:45},{n:"F7",x:70,y:95},{n:"F3",x:115,y:95},{n:"Fz",x:150,y:85},{n:"F4",x:185,y:95},{n:"F8",x:230,y:95}]}
+const REGION_COLORS = {
+  "Frontal": "#cc9988",
+  "Frontal-Central": "#bb8899",
+  "Central-Temporal": "#aa99cc",
+  "Centro-Parietal": "#88aacc",
+  "Parietal": "#88bbdd",
+  "Visual Cortex": "#ffcc56"
 };
 
-function getRegionData(name) {
-  if (name==="Visual Cortex") return {names:chN, colors:chC, params:wp};
-  const re=regions[name].electrodes, rr=sr(name.length*99);
-  const amp = name==="Parietal"?0.6:name==="Central"?0.4:0.25;
-  return {
-    names: re.map(e=>e.n),
-    colors: re.map((_,i)=>{const c=regions[name].color;return c;}),
-    params: re.map(()=>({tA:.05+rr()*amp*.3,tF:4+rr()*4,aA:.1+rr()*amp*.4,aF:8+rr()*5,bA:.03+rr()*amp*.2,bF:13+rr()*17,gA:.01+rr()*amp*.1,gF:30+rr()*30,ph:rr()*Math.PI*2,nL:.08+rr()*.15,p1:.02+rr()*amp*.2,n1:.01+rr()*amp*.15}))
-  };
-}
+const REGION_NAMES = Object.keys(REGION_COLORS);
 
-function drawW(x,W,H,el,ps,ns,cs,opts={}){
-  const n=ns.length,cH=H/n;
+// Generate wave params for each channel deterministically
+function sr(seed){let s=seed;return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};}
+const channelParams = {};
+ALL_CHANNELS.forEach((ch, i) => {
+  const rng = sr(124 * 137 + i * 53);
+  // Visual cortex channels get stronger signals
+  const isVisual = ch.region === "Visual Cortex";
+  const isParietal = ch.region === "Parietal" || ch.region === "Centro-Parietal";
+  const ampScale = isVisual ? 1.0 : isParietal ? 0.6 : 0.3;
+  channelParams[ch.name] = {
+    tA: (.1+rng()*.3)*ampScale, tF: 4+rng()*4,
+    aA: (.2+rng()*.4)*ampScale, aF: 8+rng()*5,
+    bA: (.05+rng()*.2)*ampScale, bF: 13+rng()*17,
+    gA: (.02+rng()*.1)*ampScale, gF: 30+rng()*30,
+    ph: rng()*Math.PI*2, nL: .06+rng()*.1,
+    p1: (.1+rng()*.4)*ampScale, n1: (.08+rng()*.3)*ampScale
+  };
+});
+
+function es(d,t,tL){
+  let v=d.tA*Math.sin(2*Math.PI*d.tF*t+d.ph)+d.aA*Math.sin(2*Math.PI*d.aF*t+d.ph*1.3)+d.bA*Math.sin(2*Math.PI*d.bF*t+d.ph*.7)+d.gA*Math.sin(2*Math.PI*d.gF*t+d.ph*2.1);
+  v+=d.p1*Math.exp(-Math.pow((tL-.1)/.02,2))*Math.sin(2*Math.PI*10*tL);
+  v-=d.n1*Math.exp(-Math.pow((tL-.17)/.025,2))*Math.sin(2*Math.PI*8*tL);
+  v+=(Math.random()-.5)*d.nL*2;
+  return Math.max(-1,Math.min(1,v/1.5));
+}
+function sc(c){const d=window.devicePixelRatio||1,rc=c.getBoundingClientRect();c.width=rc.width*d;c.height=rc.height*d;const x=c.getContext('2d');x.scale(d,d);return{x,W:rc.width,H:rc.height};}
+
+// Draw waveforms for a list of channel names
+function drawW(x,W,H,el,chList,opts={}){
+  const n=chList.length,cH=H/n;
   x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);
-  for(let c=0;c<n;c++){const d=ps[c],yC=cH*c+cH/2,a=cH/2-3;
-    x.strokeStyle="rgba(255,255,255,0.06)";x.lineWidth=.5;x.beginPath();x.moveTo(0,cH*(c+1));x.lineTo(W,cH*(c+1));x.stroke();
-    x.fillStyle="rgba(255,255,255,0.3)";x.font=`${Math.max(8,W*.028)}px "DM Sans",sans-serif`;x.fillText(ns[c],4,yC-a+10);
-    x.strokeStyle=cs[c];x.lineWidth=1.2;x.beginPath();
+  const isVisual = opts.region === "Visual Cortex";
+  for(let c=0;c<n;c++){
+    const name=chList[c], d=channelParams[name];
+    if(!d) continue;
+    const yC=cH*c+cH/2, a=cH/2-Math.max(1, 3-n*0.03);
+    // Grid
+    x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;x.beginPath();x.moveTo(0,cH*(c+1));x.lineTo(W,cH*(c+1));x.stroke();
+    // Label (hide if too many channels)
+    if(n<=20){
+      x.fillStyle="rgba(255,255,255,0.3)";x.font=`${Math.max(7,Math.min(11,W*.025))}px "DM Sans",sans-serif`;x.fillText(name,3,yC-a+9);
+    }
+    // Color
+    const ch = ALL_CHANNELS.find(e=>e.name===name);
+    const col = ch ? (REGION_COLORS[ch.region] || "#888") : "#888";
+    x.strokeStyle=col;x.lineWidth=n>20?0.8:1.2;x.globalAlpha=n>30?0.7:0.9;x.beginPath();
     for(let p=0;p<W;p++){const tL=(p/W)*.8,t=tL+el*.15,v=es(d,t,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
-    x.stroke();
-    if(opts.glow){const tm=el%4,ph=(tm%2)/2;
+    x.stroke();x.globalAlpha=1;
+    // Glow for visual cortex
+    if(isVisual && opts.glow){const tm=el%4,ph=(tm%2)/2;
       [{px:W*.125,tL:.1,t:.15,c:"255,220,100"},{px:W*.2125,tL:.17,t:.25,c:"255,150,80"}].forEach(m=>{
         const pv=es(d,m.tL,m.tL),py=yC+pv*a,gi=Math.exp(-Math.pow((ph-m.t)/.1,2));
-        if(gi>.05){const g=x.createRadialGradient(m.px,py,0,m.px,py,14);g.addColorStop(0,`rgba(${m.c},${gi*.6})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-14,py-14,28,28);}
+        if(gi>.05){const g=x.createRadialGradient(m.px,py,0,m.px,py,12);g.addColorStop(0,`rgba(${m.c},${gi*.5})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-12,py-12,24,24);}
       });
     }
   }
-  x.fillStyle="rgba(255,255,255,0.2)";x.font=`${Math.max(8,W*.022)}px "DM Sans",sans-serif`;x.fillText("0ms",4,H-3);x.fillText("800ms",W-38,H-3);
-  if(opts.glow){const tm=el%4,ph=(tm%2)/2;
+  // Time labels
+  x.fillStyle="rgba(255,255,255,0.2)";x.font=`${Math.max(7,W*.02)}px "DM Sans",sans-serif`;x.fillText("0ms",3,H-2);x.fillText("800ms",W-35,H-2);
+  // Glow markers
+  if(isVisual && opts.glow){const tm=el%4,ph=(tm%2)/2;
     [{px:W*.125,l:"P100",c:"255,220,100",t:.15},{px:W*.2125,l:"N170",c:"255,150,80",t:.25}].forEach(m=>{
-      const gi=Math.exp(-Math.pow((ph-m.t)/.1,2));x.strokeStyle=`rgba(${m.c},${.15+gi*.4})`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
-      x.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x.font=`bold ${Math.max(8,W*.022)}px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,11);x.textAlign="start";
+      const gi=Math.exp(-Math.pow((ph-m.t)/.1,2));x.strokeStyle=`rgba(${m.c},${.1+gi*.3})`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+      x.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x.font=`bold ${Math.max(7,W*.02)}px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,10);x.textAlign="start";
     });
   }
+  // Channel count
+  x.fillStyle="rgba(255,255,255,0.15)";x.font=`${Math.max(7,W*.02)}px "DM Sans",sans-serif`;x.textAlign="end";x.fillText(`${n} channels`,W-4,12);x.textAlign="start";
 }
 
-// Head SVG builder
-function buildHead(svg, onRegionClick) {
-  const ns="http://www.w3.org/2000/svg";
-  [{tag:"circle",a:{cx:150,cy:165,r:130,fill:"none",stroke:"#ddd","stroke-width":2}},
-   {tag:"path",a:{d:"M140 36 L150 20 L160 36",fill:"none",stroke:"#ddd","stroke-width":1.5}},
-   {tag:"path",a:{d:"M20 145 Q10 165 20 185",fill:"none",stroke:"#ddd","stroke-width":1.5}},
-   {tag:"path",a:{d:"M280 145 Q290 165 280 185",fill:"none",stroke:"#ddd","stroke-width":1.5}}
-  ].forEach(e=>{const el=document.createElementNS(ns,e.tag);Object.entries(e.a).forEach(([k,v])=>el.setAttribute(k,v));svg.appendChild(el);});
-  let act="Visual Cortex";
-  Object.entries(regions).forEach(([name,reg])=>{
-    const g=document.createElementNS(ns,"g");g.style.cursor="pointer";
-    reg.electrodes.forEach(e=>{const d=document.createElementNS(ns,"circle");d.setAttribute("cx",e.x);d.setAttribute("cy",e.y);d.setAttribute("r",name===act?5:3.5);d.setAttribute("fill",name===act?reg.color:"#ccc");d.setAttribute("opacity",name===act?"1":"0.45");d.classList.add("electrode-dot");d.dataset.region=name;d.dataset.svg=svg.id;g.appendChild(d);});
-    const ax=reg.electrodes.reduce((s,e)=>s+e.x,0)/reg.electrodes.length,my=Math.min(...reg.electrodes.map(e=>e.y));
-    const l=document.createElementNS(ns,"text");l.setAttribute("x",ax);l.setAttribute("y",my-8);l.setAttribute("text-anchor","middle");l.classList.add("region-label-svg");l.textContent=name;g.appendChild(l);
-    g.addEventListener("click",()=>{act=name;svg.querySelectorAll('.electrode-dot').forEach(d=>{const rn=d.dataset.region;d.setAttribute("r",rn===name?5:3.5);d.setAttribute("fill",rn===name?regions[rn].color:"#ccc");d.setAttribute("opacity",rn===name?"1":"0.45");});onRegionClick(name);});
-    svg.appendChild(g);
-  });
-  // Pulse
-  (function pulse(now){const t=now/1000;svg.querySelectorAll('.electrode-dot').forEach(d=>{if(d.dataset.region==="Visual Cortex"&&d.dataset.svg===svg.id){const b=d.getAttribute("opacity")==="1"?4:3.5;d.setAttribute("r",b+Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*1.2);}});requestAnimationFrame(pulse);})(performance.now());
-}
-
-// ===== OPTION 1: Tab Pills =====
+// ===== OPTION 1: Region Tabs with all channels =====
 (function(){
   const cv=document.getElementById('canvas1'), pills=document.getElementById('pills1');
   let activeRegion="Visual Cortex", s=0;
-  const regionNames=Object.keys(regions);
-  regionNames.forEach(name=>{
-    const btn=document.createElement('button');btn.className='region-pill'+(name==="Visual Cortex"?' active':'');btn.textContent=name;
-    btn.onclick=()=>{activeRegion=name;pills.querySelectorAll('.region-pill').forEach(b=>b.classList.toggle('active',b.textContent===name));};
+  REGION_NAMES.forEach(name=>{
+    const count = ALL_CHANNELS.filter(c=>c.region===name).length;
+    const btn=document.createElement('button');
+    btn.className='region-pill'+(name==="Visual Cortex"?' active':'');
+    btn.textContent=`${name} (${count})`;
+    btn.onclick=()=>{activeRegion=name;pills.querySelectorAll('.region-pill').forEach(b=>b.classList.toggle('active',b.textContent.startsWith(name)));
+      // Resize canvas height based on channel count
+      const h = Math.max(180, Math.min(500, count * 22));
+      cv.style.height = h + 'px';
+    };
     pills.appendChild(btn);
   });
-  function draw(now){if(!s)s=now;const{x,W,H}=sc(cv);const rd=getRegionData(activeRegion);drawW(x,W,H,(now-s)/1000,rd.params,rd.names,rd.colors,{glow:activeRegion==="Visual Cortex"});requestAnimationFrame(draw);}
+  // Also add "All 63" tab
+  const allBtn=document.createElement('button');allBtn.className='region-pill';allBtn.textContent='All 63';
+  allBtn.onclick=()=>{activeRegion="ALL";pills.querySelectorAll('.region-pill').forEach(b=>b.classList.remove('active'));allBtn.classList.add('active');cv.style.height='500px';};
+  pills.appendChild(allBtn);
+
+  function draw(now){if(!s)s=now;const{x,W,H}=sc(cv);
+    const chList = activeRegion==="ALL" ? ALL_CHANNELS.map(c=>c.name) : ALL_CHANNELS.filter(c=>c.region===activeRegion).map(c=>c.name);
+    drawW(x,W,H,(now-s)/1000,chList,{glow:true,region:activeRegion});
+    requestAnimationFrame(draw);}
   requestAnimationFrame(draw);
 })();
 
-// ===== OPTION 2: Expandable Panel =====
+// ===== OPTION 2: Individual electrode clicks =====
 (function(){
-  const cv=document.getElementById('canvas2'), cvSub=document.getElementById('canvas2sub');
-  const trigger=document.getElementById('expandTrigger'), panel=document.getElementById('expandPanel');
-  const mainLabel=document.getElementById('expandRegionName'), subLabel=document.getElementById('expandSubLabel');
-  let mainRegion="Visual Cortex", subRegion="Parietal", s=0;
+  const cv=document.getElementById('canvas2'), label=document.getElementById('elecLabel2');
+  const svg=document.getElementById('headSvg2');
+  let activeElectrode="Oz", s=0;
 
-  trigger.onclick=()=>{trigger.classList.toggle('open');panel.classList.toggle('open');};
+  // Build head SVG with all 63 dots
+  const ns="http://www.w3.org/2000/svg";
+  [{tag:"circle",a:{cx:150,cy:165,r:130,fill:"none",stroke:"#ddd","stroke-width":1.5}},
+   {tag:"path",a:{d:"M140 36 L150 22 L160 36",fill:"none",stroke:"#ddd","stroke-width":1.2}},
+   {tag:"path",a:{d:"M20 145 Q12 165 20 185",fill:"none",stroke:"#ddd","stroke-width":1.2}},
+   {tag:"path",a:{d:"M280 145 Q288 165 280 185",fill:"none",stroke:"#ddd","stroke-width":1.2}}
+  ].forEach(e=>{const el=document.createElementNS(ns,e.tag);Object.entries(e.a).forEach(([k,v])=>el.setAttribute(k,v));svg.appendChild(el);});
 
-  buildHead(document.getElementById('headSvg2'), name=>{
-    mainRegion=name; mainLabel.textContent=name; subLabel.textContent=name;
+  ALL_CHANNELS.forEach(ch => {
+    const dot = document.createElementNS(ns, "circle");
+    dot.setAttribute("cx", ch.x); dot.setAttribute("cy", ch.y);
+    dot.setAttribute("r", ch.name===activeElectrode ? 6 : 3.5);
+    dot.setAttribute("fill", ch.name===activeElectrode ? REGION_COLORS[ch.region] : "#ccc");
+    dot.setAttribute("opacity", ch.name===activeElectrode ? "1" : "0.4");
+    dot.classList.add("electrode-dot");
+    dot.dataset.name = ch.name;
+    dot.dataset.region = ch.region;
+
+    // Tooltip on hover
+    dot.addEventListener("mouseenter", () => {
+      if(ch.name !== activeElectrode) {
+        dot.setAttribute("r", "5");
+        dot.setAttribute("opacity", "0.7");
+        dot.setAttribute("fill", REGION_COLORS[ch.region]);
+      }
+    });
+    dot.addEventListener("mouseleave", () => {
+      if(ch.name !== activeElectrode) {
+        dot.setAttribute("r", "3.5");
+        dot.setAttribute("opacity", "0.4");
+        dot.setAttribute("fill", "#ccc");
+      }
+    });
+    dot.addEventListener("click", () => {
+      activeElectrode = ch.name;
+      label.textContent = `${ch.name} (${ch.region})`;
+      // Update all dots
+      svg.querySelectorAll('.electrode-dot').forEach(d => {
+        const isActive = d.dataset.name === ch.name;
+        d.setAttribute("r", isActive ? 6 : 3.5);
+        d.setAttribute("fill", isActive ? REGION_COLORS[d.dataset.region] : "#ccc");
+        d.setAttribute("opacity", isActive ? "1" : "0.4");
+      });
+    });
+    svg.appendChild(dot);
+
+    // Tiny label for each dot
+    const lbl = document.createElementNS(ns, "text");
+    lbl.setAttribute("x", ch.x); lbl.setAttribute("y", ch.y - 6);
+    lbl.classList.add("electrode-label-svg");
+    lbl.textContent = ch.name;
+    svg.appendChild(lbl);
   });
 
+  // Pulse visual cortex dots
+  (function pulse(now){
+    const t=now/1000;
+    svg.querySelectorAll('.electrode-dot').forEach(d=>{
+      if(d.dataset.region==="Visual Cortex" && d.dataset.name!==activeElectrode){
+        const p = 3.5 + Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*1;
+        d.setAttribute("r", p);
+        const intensity = 0.3 + Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*0.15;
+        d.setAttribute("opacity", intensity);
+        d.setAttribute("fill", REGION_COLORS["Visual Cortex"]);
+      }
+    });
+    requestAnimationFrame(pulse);
+  })(performance.now());
+
+  // Draw single channel waveform (big, detailed)
   function draw(now){
-    if(!s)s=now;const el=(now-s)/1000;
-    // Main canvas
-    const m=sc(cv);const rd=getRegionData(mainRegion);drawW(m.x,m.W,m.H,el,rd.params,rd.names,rd.colors,{glow:mainRegion==="Visual Cortex"});
-    // Sub canvas (if panel open)
-    if(panel.classList.contains('open')){
-      const s2=sc(cvSub);const rd2=getRegionData(mainRegion);drawW(s2.x,s2.W,s2.H,el,rd2.params,rd2.names,rd2.colors,{glow:mainRegion==="Visual Cortex"});
+    if(!s)s=now;const{x,W,H}=sc(cv);
+    const d=channelParams[activeElectrode]; if(!d)return requestAnimationFrame(draw);
+    const el=(now-s)/1000;
+    const ch=ALL_CHANNELS.find(c=>c.name===activeElectrode);
+    const isVisual = ch && ch.region==="Visual Cortex";
+
+    x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);
+
+    // Draw waveform large and centered
+    const yC=H/2, a=H/2-20;
+    const col = ch ? REGION_COLORS[ch.region] : "#888";
+
+    // Faint grid
+    x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;
+    x.beginPath();x.moveTo(0,yC);x.lineTo(W,yC);x.stroke();
+
+    // Main waveform
+    x.strokeStyle=col;x.lineWidth=2;x.beginPath();
+    for(let p=0;p<W;p++){const tL=(p/W)*.8,t=tL+el*.15,v=es(d,t,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
+    x.stroke();
+
+    // Subtle fill under curve
+    x.lineTo(W,yC);x.lineTo(0,yC);x.closePath();
+    x.fillStyle=col.replace(')',',0.06)').replace('rgb','rgba');
+    x.globalAlpha=0.15;x.fill();x.globalAlpha=1;
+
+    // Glow at peaks for visual cortex
+    if(isVisual){const tm=el%4,ph=(tm%2)/2;
+      [{px:W*.125,tL:.1,t:.15,c:"255,220,100",l:"P100"},{px:W*.2125,tL:.17,t:.25,c:"255,150,80",l:"N170"}].forEach(m=>{
+        const pv=es(d,m.tL,m.tL),py=yC+pv*a,gi=Math.exp(-Math.pow((ph-m.t)/.1,2));
+        if(gi>.05){const g=x.createRadialGradient(m.px,py,0,m.px,py,25);g.addColorStop(0,`rgba(${m.c},${gi*.6})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-25,py-25,50,50);}
+        // Marker line
+        x.strokeStyle=`rgba(${m.c},${.15+gi*.3})`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+        x.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x.font=`bold 10px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,14);x.textAlign="start";
+      });
     }
-    requestAnimationFrame(draw);
-  }
-  requestAnimationFrame(draw);
-})();
 
-// ===== OPTION 3: Modal =====
-(function(){
-  const cv=document.getElementById('canvas3'), cvModal=document.getElementById('canvas3modal');
-  const overlay=document.getElementById('modalOverlay');
-  const openBtn=document.getElementById('modalOpenBtn'), closeBtn=document.getElementById('modalClose');
-  const mainLabel=document.getElementById('modalRegionName'), modalLabel=document.getElementById('modalWaveLabel');
-  let mainRegion="Visual Cortex", modalRegion="Visual Cortex", s=0;
+    // Labels
+    x.fillStyle="rgba(255,255,255,0.3)";x.font=`11px "DM Sans",sans-serif`;
+    x.fillText(activeElectrode,6,16);
+    x.fillStyle="rgba(255,255,255,0.15)";x.font=`9px "DM Sans",sans-serif`;
+    x.fillText("0ms",4,H-4);x.textAlign="end";x.fillText("800ms",W-4,H-4);x.textAlign="start";
 
-  openBtn.onclick=()=>overlay.classList.add('open');
-  closeBtn.onclick=()=>overlay.classList.remove('open');
-  overlay.onclick=(e)=>{if(e.target===overlay)overlay.classList.remove('open');};
-
-  buildHead(document.getElementById('headSvg3'), name=>{
-    mainRegion=name; mainLabel.textContent=name; modalRegion=name; modalLabel.textContent=name;
-  });
-
-  function draw(now){
-    if(!s)s=now;const el=(now-s)/1000;
-    const m=sc(cv);const rd=getRegionData(mainRegion);drawW(m.x,m.W,m.H,el,rd.params,rd.names,rd.colors,{glow:mainRegion==="Visual Cortex"});
-    if(overlay.classList.contains('open')){
-      const s2=sc(cvModal);const rd2=getRegionData(modalRegion);drawW(s2.x,s2.W,s2.H,el,rd2.params,rd2.names,rd2.colors,{glow:modalRegion==="Visual Cortex"});
-    }
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
