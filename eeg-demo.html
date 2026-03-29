@@ -112,19 +112,11 @@
       background: #e5e2dc;
     }
 
-    /* brainwave canvas */
-    .brainwave-container {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4/3;
+    .demo-step.brainwave-step img {
+      aspect-ratio: auto;
+      object-fit: contain;
       border-radius: 4px;
-      overflow: hidden;
-      background: #1a1a2e;
-    }
-
-    .brainwave-container canvas {
-      width: 100%;
-      height: 100%;
+      background: #fff;
     }
 
     /* score bar */
@@ -219,14 +211,6 @@
     .pipeline-arrow {
       color: #ccc;
       font-size: 0.85rem;
-    }
-
-    /* channel labels */
-    .channel-info {
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 0.5rem;
-      text-align: center;
     }
 
     @media (max-width: 600px) {
@@ -339,12 +323,9 @@
 
       <div class="demo-card">
         <div class="demo-pipeline">
-          <div class="demo-step">
+          <div class="demo-step brainwave-step">
             <div class="pipeline-label">Brain Activity</div>
-            <div class="brainwave-container">
-              <canvas id="eegCanvas"></canvas>
-            </div>
-            <div class="channel-info">8 visual cortex channels</div>
+            <img id="brainwave" src="" alt="EEG brain waves">
           </div>
           <div class="demo-step">
             <div class="pipeline-label">AI Reconstruction</div>
@@ -399,158 +380,9 @@
       { idx: "038", cat: "cheetah",       score: 0.679, gtFile: "idx038_cheetah_GT.png",       reconFile: "idx038_cheetah_top1_clip0.679_sub-05.png" },
     ];
 
+    const BRAINWAVE_REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/brainwaves";
+
     let currentSample = 0;
-
-    // ---- EEG Canvas Animation ----
-    const channelNames = ["O1", "Oz", "O2", "PO3", "POz", "PO4", "PO7", "PO8"];
-    const channelColors = [
-      "#6ec6ff", "#5eb8ff", "#4eaaff",
-      "#ff8a80", "#ff7070",
-      "#a0e87a", "#80d860",
-      "#ffcc56"
-    ];
-
-    // Each sample gets deterministic "brain data" from a seeded random
-    function seededRandom(seed) {
-      let s = seed;
-      return function() {
-        s = (s * 16807 + 0) % 2147483647;
-        return (s - 1) / 2147483646;
-      };
-    }
-
-    // Pre-generate wave data per sample
-    const waveData = samples.map((sample, si) => {
-      const rand = seededRandom(parseInt(sample.idx) * 137 + si * 31);
-      return channelNames.map(() => {
-        // Mix of frequencies: theta (4-8Hz), alpha (8-13Hz), beta (13-30Hz)
-        const thetaAmp = 0.2 + rand() * 0.4;
-        const thetaFreq = 4 + rand() * 4;
-        const alphaAmp = 0.3 + rand() * 0.5;
-        const alphaFreq = 8 + rand() * 5;
-        const betaAmp = 0.1 + rand() * 0.3;
-        const betaFreq = 13 + rand() * 17;
-        const gammaAmp = 0.05 + rand() * 0.15;
-        const gammaFreq = 30 + rand() * 30;
-        const phase = rand() * Math.PI * 2;
-        const noiseLevel = 0.08 + rand() * 0.12;
-        // P100/N170 evoked response components
-        const p100Amp = 0.3 + rand() * 0.5;
-        const n170Amp = 0.2 + rand() * 0.4;
-        return { thetaAmp, thetaFreq, alphaAmp, alphaFreq, betaAmp, betaFreq,
-                 gammaAmp, gammaFreq, phase, noiseLevel, p100Amp, n170Amp };
-      });
-    });
-
-    let animFrame;
-    let startTime = 0;
-
-    function drawEEG(canvas) {
-      const ctx = canvas.getContext("2d");
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      const W = rect.width;
-      const H = rect.height;
-
-      const data = waveData[currentSample];
-      const nCh = channelNames.length;
-      const chH = H / nCh;
-      const padding = 4;
-
-      function animate(now) {
-        if (!startTime) startTime = now;
-        const elapsed = (now - startTime) / 1000; // seconds
-
-        ctx.fillStyle = "#1a1a2e";
-        ctx.fillRect(0, 0, W, H);
-
-        // Time axis info
-        const timeWindow = 0.5; // 500ms window
-
-        // Draw channels
-        for (let ch = 0; ch < nCh; ch++) {
-          const d = data[ch];
-          const yCenter = chH * ch + chH / 2;
-          const amp = (chH / 2) - padding;
-
-          // Channel label
-          ctx.fillStyle = "rgba(255,255,255,0.35)";
-          ctx.font = `${Math.max(9, W * 0.04)}px "DM Sans", sans-serif`;
-          ctx.fillText(channelNames[ch], 4, yCenter - amp + 12);
-
-          // Subtle grid line
-          ctx.strokeStyle = "rgba(255,255,255,0.06)";
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(0, chH * (ch + 1));
-          ctx.lineTo(W, chH * (ch + 1));
-          ctx.stroke();
-
-          // Draw waveform
-          ctx.strokeStyle = channelColors[ch];
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-
-          const steps = Math.floor(W);
-          for (let px = 0; px < steps; px++) {
-            const t = (px / steps) * timeWindow + elapsed * 0.3;
-
-            // Composite signal
-            let val = 0;
-            val += d.thetaAmp * Math.sin(2 * Math.PI * d.thetaFreq * t + d.phase);
-            val += d.alphaAmp * Math.sin(2 * Math.PI * d.alphaFreq * t + d.phase * 1.3);
-            val += d.betaAmp * Math.sin(2 * Math.PI * d.betaFreq * t + d.phase * 0.7);
-            val += d.gammaAmp * Math.sin(2 * Math.PI * d.gammaFreq * t + d.phase * 2.1);
-
-            // Evoked response components (time-locked)
-            const tLocal = (px / steps) * timeWindow;
-            // P100 component (~100ms)
-            val += d.p100Amp * Math.exp(-Math.pow((tLocal - 0.1) / 0.02, 2)) *
-                   Math.sin(2 * Math.PI * 10 * tLocal);
-            // N170 component (~170ms)
-            val -= d.n170Amp * Math.exp(-Math.pow((tLocal - 0.17) / 0.025, 2)) *
-                   Math.sin(2 * Math.PI * 8 * tLocal);
-
-            // Noise
-            val += (Math.random() - 0.5) * d.noiseLevel * 2;
-
-            // Normalize
-            val = Math.max(-1, Math.min(1, val / 1.5));
-
-            const y = yCenter + val * amp;
-            if (px === 0) ctx.moveTo(px, y);
-            else ctx.lineTo(px, y);
-          }
-          ctx.stroke();
-        }
-
-        // Time markers
-        ctx.fillStyle = "rgba(255,255,255,0.25)";
-        ctx.font = `${Math.max(8, W * 0.035)}px "DM Sans", sans-serif`;
-        ctx.fillText("0ms", 4, H - 4);
-        ctx.fillText("500ms", W - 36, H - 4);
-
-        // Stimulus onset marker
-        const onsetX = 0;
-        ctx.strokeStyle = "rgba(255, 204, 86, 0.4)";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath();
-        ctx.moveTo(onsetX, 0);
-        ctx.lineTo(onsetX, H);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        animFrame = requestAnimationFrame(animate);
-      }
-
-      if (animFrame) cancelAnimationFrame(animFrame);
-      startTime = 0;
-      animFrame = requestAnimationFrame(animate);
-    }
 
     // ---- Color for score ----
     function scoreColor(score) {
@@ -564,6 +396,7 @@
       currentSample = index;
       const s = samples[index];
 
+      document.getElementById("brainwave").src = `${BRAINWAVE_REPO}/brainwave_${s.idx}.png`;
       document.getElementById("recon").src = `${REPO}/${s.reconFile}`;
       document.getElementById("gt").src = `${REPO}/${s.gtFile}`;
 
@@ -578,10 +411,6 @@
       document.querySelectorAll(".sample-btn").forEach((btn, i) => {
         btn.classList.toggle("active", i === index);
       });
-
-      // Restart EEG animation
-      const canvas = document.getElementById("eegCanvas");
-      drawEEG(canvas);
     }
 
     // ---- Build sample nav ----
@@ -596,12 +425,6 @@
 
     // ---- Init ----
     showSample(0);
-
-    // Resize handler
-    window.addEventListener("resize", () => {
-      const canvas = document.getElementById("eegCanvas");
-      drawEEG(canvas);
-    });
   </script>
 
 </body>
