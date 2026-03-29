@@ -153,6 +153,34 @@
     </div>
   </section>
 
+  <!-- OPTION 4: Playback -->
+  <section class="viz-section">
+    <h2>4: Temporal Playback</h2>
+    <p>Replays the 800ms recording in slow motion. A cursor sweeps across as the waveform draws itself, showing the brain response unfolding in real time. Glows at P100/N170 peaks. Loops after a pause.</p>
+    <div class="demo-card">
+      <div class="demo-pipeline">
+        <div class="demo-step">
+          <div class="pipeline-label">Brain Activity &mdash; <span id="playback-time">0 ms</span></div>
+          <canvas class="brain-canvas" id="canvas4" style="height:260px;"></canvas>
+          <div class="region-pills" id="pills4"></div>
+        </div>
+        <div class="demo-step">
+          <div class="pipeline-label">AI Reconstruction</div>
+          <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
+        </div>
+        <div class="demo-step">
+          <div class="pipeline-label">Ground Truth</div>
+          <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+        </div>
+      </div>
+      <div class="score-row">
+        <span class="score-label">CLIP Similarity</span>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+        <span class="score-value">0.797</span>
+      </div>
+    </div>
+  </section>
+
 </main>
 <footer><p><a href="/">Aaron Jacobson</a></p></footer>
 
@@ -553,6 +581,140 @@ function drawW(x,W,H,el,chList,opts={}){
 
     if(state.mode==="single") drawSingle(x,W,H,el,state.channel);
     else drawRegion(x,W,H,el,state.region);
+
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ===== OPTION 4: Temporal Playback =====
+(function(){
+  const cv=document.getElementById('canvas4'), pills=document.getElementById('pills4');
+  const timeLabel=document.getElementById('playback-time');
+  let activeRegion="Visual Cortex", startTime=0;
+  const PLAYBACK_DURATION = 2500; // 2.5s to play 800ms (slowed ~3x)
+  const PAUSE_DURATION = 1500; // pause before loop
+
+  // Build region pills
+  REGION_NAMES.forEach(name=>{
+    const count = ALL_CHANNELS.filter(c=>c.region===name).length;
+    const btn=document.createElement('button');
+    btn.className='region-pill'+(name==="Visual Cortex"?' active':'');
+    btn.textContent=name;
+    btn.dataset.region=name;
+    btn.onclick=()=>{
+      activeRegion=name;
+      pills.querySelectorAll('.region-pill').forEach(b=>b.classList.toggle('active',b.dataset.region===name));
+      const h = Math.max(200, Math.min(400, count*24));
+      cv.style.height = h+'px';
+      startTime=0; // restart playback
+    };
+    pills.appendChild(btn);
+  });
+
+  function draw(now){
+    if(!startTime) startTime=now;
+    const elapsed = now - startTime;
+    const totalCycle = PLAYBACK_DURATION + PAUSE_DURATION;
+    const cyclePos = elapsed % totalCycle;
+    const playProgress = Math.min(cyclePos / PLAYBACK_DURATION, 1); // 0 to 1
+    const simTimeMs = Math.round(playProgress * 800);
+
+    timeLabel.textContent = playProgress < 1 ? `${simTimeMs} ms` : '800 ms';
+
+    const dpr=window.devicePixelRatio||1, rc=cv.getBoundingClientRect();
+    cv.width=rc.width*dpr; cv.height=rc.height*dpr;
+    const x=cv.getContext('2d'); x.scale(dpr,dpr);
+    const W=rc.width, H=rc.height;
+
+    const chs = ALL_CHANNELS.filter(c=>c.region===activeRegion);
+    const n=chs.length, cH=H/n;
+    const isVisual = activeRegion==="Visual Cortex";
+
+    x.fillStyle="#1a1a2e"; x.fillRect(0,0,W,H);
+
+    // How far across the canvas to draw (based on playback progress)
+    const drawLimit = Math.floor(W * playProgress);
+
+    for(let i=0;i<n;i++){
+      const ch=chs[i], d=channelParams[ch.name]; if(!d) continue;
+      const yC=cH*i+cH/2, a=cH/2-2;
+      const col=REGION_COLORS[activeRegion];
+
+      // Grid line
+      x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;
+      x.beginPath();x.moveTo(0,cH*(i+1));x.lineTo(W,cH*(i+1));x.stroke();
+
+      // Channel label
+      if(n<=20){
+        x.fillStyle="rgba(255,255,255,0.3)";
+        x.font=`${Math.max(7,Math.min(10,cH*.4))}px "DM Sans",sans-serif`;
+        x.fillText(ch.name,4,yC-a+Math.max(8,cH*.35));
+      }
+
+      // Draw waveform up to current playback position
+      x.strokeStyle=col; x.lineWidth=n>12?0.8:1.2; x.beginPath();
+      for(let p=0;p<drawLimit;p++){
+        const tL=(p/W)*.8, v=es(d,tL), y=yC+v*a;
+        p===0?x.moveTo(p,y):x.lineTo(p,y);
+      }
+      x.stroke();
+
+      // Glow at P100 (~100ms = 12.5% of 800ms)
+      if(isVisual){
+        const p100px = W*0.125;
+        if(drawLimit > p100px){
+          const distFromCursor = Math.abs(drawLimit - p100px) / W;
+          const gi = Math.exp(-Math.pow(distFromCursor/.04,2));
+          if(gi>.05){
+            const pv=es(d,0.1), py=yC+pv*a;
+            const g=x.createRadialGradient(p100px,py,0,p100px,py,16);
+            g.addColorStop(0,`rgba(255,220,100,${gi*.7})`);g.addColorStop(1,"rgba(255,220,100,0)");
+            x.fillStyle=g;x.fillRect(p100px-16,py-16,32,32);
+          }
+        }
+        // Glow at N170 (~170ms = 21.25% of 800ms)
+        const n170px = W*0.2125;
+        if(drawLimit > n170px){
+          const distFromCursor = Math.abs(drawLimit - n170px) / W;
+          const gi = Math.exp(-Math.pow(distFromCursor/.04,2));
+          if(gi>.05){
+            const pv=es(d,0.17), py=yC+pv*a;
+            const g=x.createRadialGradient(n170px,py,0,n170px,py,16);
+            g.addColorStop(0,`rgba(255,150,80,${gi*.6})`);g.addColorStop(1,"rgba(255,150,80,0)");
+            x.fillStyle=g;x.fillRect(n170px-16,py-16,32,32);
+          }
+        }
+      }
+    }
+
+    // Playhead cursor
+    if(playProgress < 1){
+      x.strokeStyle="rgba(255,255,255,0.4)";x.lineWidth=1;
+      x.beginPath();x.moveTo(drawLimit,0);x.lineTo(drawLimit,H);x.stroke();
+      // Cursor glow
+      const cg=x.createLinearGradient(drawLimit-8,0,drawLimit+2,0);
+      cg.addColorStop(0,"rgba(255,255,255,0)");cg.addColorStop(1,"rgba(255,255,255,0.05)");
+      x.fillStyle=cg;x.fillRect(drawLimit-8,0,10,H);
+    }
+
+    // P100/N170 marker lines (appear once cursor passes them)
+    if(isVisual){
+      [{px:W*.125,l:"P100",c:"255,220,100"},{px:W*.2125,l:"N170",c:"255,150,80"}].forEach(m=>{
+        if(drawLimit > m.px){
+          x.strokeStyle=`rgba(${m.c},.2)`;x.lineWidth=1;x.setLineDash([2,2]);
+          x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+          x.fillStyle=`rgba(${m.c},.5)`;x.font=`bold 8px "DM Sans",sans-serif`;
+          x.textAlign="center";x.fillText(m.l,m.px,9);x.textAlign="start";
+        }
+      });
+    }
+
+    // Time axis
+    x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;
+    x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
+    // Channel count
+    x.fillStyle="rgba(255,255,255,0.12)";x.font=`8px "DM Sans",sans-serif`;x.textAlign="end";x.fillText(`${n} ch`,W-4,12);x.textAlign="start";
 
     requestAnimationFrame(draw);
   }
