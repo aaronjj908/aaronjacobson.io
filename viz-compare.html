@@ -125,6 +125,34 @@
     </div>
   </section>
 
+  <!-- OPTION 3: Hybrid -->
+  <section class="viz-section">
+    <h2>3: Hybrid — Single Channel Default + Region Tabs</h2>
+    <p>Loads with Oz in full detail. Tabs switch to region stacked view. Click any channel label to isolate it. Best of both worlds.</p>
+    <div class="demo-card">
+      <div class="demo-pipeline">
+        <div class="demo-step">
+          <div class="pipeline-label">Brain Activity &mdash; <span id="hybrid-region-name">Oz</span></div>
+          <canvas class="brain-canvas" id="canvas3" style="height:260px;"></canvas>
+          <div class="region-pills" id="pills3"></div>
+        </div>
+        <div class="demo-step">
+          <div class="pipeline-label">AI Reconstruction</div>
+          <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png" alt="reconstruction">
+        </div>
+        <div class="demo-step">
+          <div class="pipeline-label">Ground Truth</div>
+          <img src="https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png" alt="ground truth">
+        </div>
+      </div>
+      <div class="score-row">
+        <span class="score-label">CLIP Similarity</span>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
+        <span class="score-value">0.797</span>
+      </div>
+    </div>
+  </section>
+
 </main>
 <footer><p><a href="/">Aaron Jacobson</a></p></footer>
 
@@ -379,6 +407,152 @@ function drawW(x,W,H,el,chList,opts={}){
     x.fillText(activeElectrode,6,16);
     x.fillStyle="rgba(255,255,255,0.15)";x.font=`9px "DM Sans",sans-serif`;
     x.fillText("0ms",4,H-4);x.textAlign="end";x.fillText("800ms",W-4,H-4);x.textAlign="start";
+
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ===== OPTION 3: Hybrid =====
+(function(){
+  const cv=document.getElementById('canvas3'), pills=document.getElementById('pills3');
+  const titleLabel=document.getElementById('hybrid-region-name');
+  // State: either {mode:"single", channel:"Oz"} or {mode:"region", region:"Visual Cortex"}
+  let state = {mode:"single", channel:"Oz"};
+  let s=0;
+
+  // Build pills: one per region
+  REGION_NAMES.forEach(name=>{
+    const count = ALL_CHANNELS.filter(c=>c.region===name).length;
+    const btn=document.createElement('button');
+    btn.className='region-pill';
+    btn.textContent=name;
+    btn.dataset.region=name;
+    btn.onclick=()=>{
+      state={mode:"region",region:name};
+      titleLabel.textContent=`${name} (${count} channels)`;
+      updatePills();
+      cv.style.height=Math.max(200, Math.min(400, count*24))+'px';
+    };
+    pills.appendChild(btn);
+  });
+
+  function updatePills(){
+    pills.querySelectorAll('.region-pill').forEach(b=>{
+      if(b.dataset.region) b.classList.toggle('active', state.mode==="region" && state.region===b.dataset.region);
+      else b.classList.remove('active'); // single-channel buttons
+    });
+  }
+
+  // Draw
+  function drawSingle(x,W,H,el,chName){
+    const d=channelParams[chName]; if(!d)return;
+    const ch=ALL_CHANNELS.find(c=>c.name===chName);
+    const isVisual=ch&&ch.region==="Visual Cortex";
+    const col=ch?REGION_COLORS[ch.region]:"#888";
+
+    x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);
+    const yC=H/2, a=H/2-16;
+
+    // Center line
+    x.strokeStyle="rgba(255,255,255,0.04)";x.lineWidth=.5;
+    x.beginPath();x.moveTo(0,yC);x.lineTo(W,yC);x.stroke();
+
+    // Waveform
+    x.strokeStyle=col;x.lineWidth=2;x.beginPath();
+    for(let p=0;p<W;p++){const tL=(p/W)*.8,t=tL+el*.15,v=es(d,t,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
+    x.stroke();
+
+    // Fill under
+    x.lineTo(W,yC);x.lineTo(0,yC);x.closePath();
+    x.globalAlpha=0.08;x.fillStyle=col;x.fill();x.globalAlpha=1;
+
+    // Glow peaks
+    if(isVisual){const tm=el%4,ph=(tm%2)/2;
+      [{px:W*.125,tL:.1,t:.15,c:"255,220,100",l:"P100"},{px:W*.2125,tL:.17,t:.25,c:"255,150,80",l:"N170"}].forEach(m=>{
+        const pv=es(d,m.tL,m.tL),py=yC+pv*a,gi=Math.exp(-Math.pow((ph-m.t)/.1,2));
+        if(gi>.05){const g=x.createRadialGradient(m.px,py,0,m.px,py,22);g.addColorStop(0,`rgba(${m.c},${gi*.6})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-22,py-22,44,44);}
+        x.strokeStyle=`rgba(${m.c},${.12+gi*.3})`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+        x.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x.font=`bold 9px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,12);x.textAlign="start";
+      });
+    }
+
+    // Channel label
+    x.fillStyle="rgba(255,255,255,0.35)";x.font=`12px "DM Sans",sans-serif`;x.fillText(chName,6,16);
+    if(ch){x.fillStyle="rgba(255,255,255,0.15)";x.font=`9px "DM Sans",sans-serif`;x.fillText(ch.region,6,28);}
+    x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;x.fillText("0ms",4,H-3);x.textAlign="end";x.fillText("800ms",W-4,H-3);x.textAlign="start";
+  }
+
+  function drawRegion(x,W,H,el,regionName){
+    const chs=ALL_CHANNELS.filter(c=>c.region===regionName);
+    const n=chs.length, cH=H/n;
+    const isVisual=regionName==="Visual Cortex";
+    x.fillStyle="#1a1a2e";x.fillRect(0,0,W,H);
+
+    for(let i=0;i<n;i++){
+      const ch=chs[i], d=channelParams[ch.name]; if(!d)continue;
+      const yC=cH*i+cH/2, a=cH/2-2;
+      const col=REGION_COLORS[regionName];
+
+      // Grid
+      x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;x.beginPath();x.moveTo(0,cH*(i+1));x.lineTo(W,cH*(i+1));x.stroke();
+
+      // Clickable label
+      x.fillStyle="rgba(255,255,255,0.35)";x.font=`${Math.max(7,Math.min(10, cH*.4))}px "DM Sans",sans-serif`;
+      x.fillText(ch.name,4,yC-a+Math.max(8,cH*.35));
+
+      // Waveform
+      x.strokeStyle=col;x.lineWidth=n>12?0.8:1.1;x.beginPath();
+      for(let p=0;p<W;p++){const tL=(p/W)*.8,t=tL+el*.15,v=es(d,t,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
+      x.stroke();
+
+      // Glow for visual cortex
+      if(isVisual){const tm=el%4,ph=(tm%2)/2;
+        [{px:W*.125,tL:.1,t:.15,c:"255,220,100"},{px:W*.2125,tL:.17,t:.25,c:"255,150,80"}].forEach(m=>{
+          const pv=es(d,m.tL,m.tL),py=yC+pv*a,gi=Math.exp(-Math.pow((ph-m.t)/.1,2));
+          if(gi>.05){const g=x.createRadialGradient(m.px,py,0,m.px,py,10);g.addColorStop(0,`rgba(${m.c},${gi*.4})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-10,py-10,20,20);}
+        });
+      }
+    }
+    // Time + markers
+    x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
+    if(isVisual){const tm=el%4,ph=(tm%2)/2;
+      [{px:W*.125,l:"P100",c:"255,220,100",t:.15},{px:W*.2125,l:"N170",c:"255,150,80",t:.25}].forEach(m=>{
+        const gi=Math.exp(-Math.pow((ph-m.t)/.1,2));x.strokeStyle=`rgba(${m.c},${.1+gi*.25})`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+        x.fillStyle=`rgba(${m.c},${.25+gi*.4})`;x.font=`bold 8px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,9);x.textAlign="start";
+      });
+    }
+    // Channel count
+    x.fillStyle="rgba(255,255,255,0.12)";x.font=`8px "DM Sans",sans-serif`;x.textAlign="end";x.fillText(`${n} ch`,W-4,12);x.textAlign="start";
+    // Click hint
+    x.fillStyle="rgba(255,255,255,0.1)";x.font=`8px "DM Sans",sans-serif`;x.textAlign="end";x.fillText("click a channel name to isolate",W-4,24);x.textAlign="start";
+  }
+
+  // Click on canvas to select individual channel from stacked view
+  cv.addEventListener("click", (e) => {
+    if(state.mode!=="region") return;
+    const rect=cv.getBoundingClientRect();
+    const clickY=(e.clientY-rect.top)/(rect.height);
+    const chs=ALL_CHANNELS.filter(c=>c.region===state.region);
+    const idx=Math.floor(clickY*chs.length);
+    if(idx>=0 && idx<chs.length){
+      const chName=chs[idx].name;
+      state={mode:"single",channel:chName};
+      titleLabel.textContent=chName;
+      cv.style.height='260px';
+      updatePills();
+    }
+  });
+
+  function draw(now){
+    if(!s)s=now;const el=(now-s)/1000;
+    const dpr=window.devicePixelRatio||1,rc=cv.getBoundingClientRect();
+    cv.width=rc.width*dpr;cv.height=rc.height*dpr;
+    const x=cv.getContext('2d');x.scale(dpr,dpr);
+    const W=rc.width,H=rc.height;
+
+    if(state.mode==="single") drawSingle(x,W,H,el,state.channel);
+    else drawRegion(x,W,H,el,state.region);
 
     requestAnimationFrame(draw);
   }
