@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EEG Visualization Comparison</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    main { max-width: 960px; }
+
+    .viz-section {
+      margin-bottom: 3rem;
+    }
+
+    .viz-section h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .viz-section > p {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 1.25rem;
+      max-width: 600px;
+    }
+
+    .viz-card {
+      background: #fff;
+      border: 1px solid #e5e2dc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .viz-label {
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      padding: 1rem 1.25rem 0.5rem;
+    }
+
+    /* ===== Option A: Original animated waveforms ===== */
+    .waveform-canvas {
+      width: 100%;
+      height: 320px;
+      display: block;
+    }
+
+    /* ===== Option B: Interactive head map ===== */
+    .headmap-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 380px;
+    }
+
+    .headmap-left {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .headmap-svg {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .headmap-right {
+      background: #1a1a2e;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .headmap-right canvas {
+      width: 100%;
+      height: 260px;
+    }
+
+    .headmap-right .region-label {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .electrode-dot {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .electrode-dot:hover {
+      r: 7;
+    }
+
+    .region-group {
+      cursor: pointer;
+    }
+
+    .region-group:hover .electrode-dot {
+      opacity: 1;
+    }
+
+    .region-label-svg {
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 9px;
+      fill: #999;
+      pointer-events: none;
+    }
+
+    /* ===== Option C: Cinematic sequence ===== */
+    .cinema-canvas {
+      width: 100%;
+      height: 360px;
+      display: block;
+    }
+
+    .cinema-controls {
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-top: 1px solid #eee;
+    }
+
+    .cinema-btn {
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 0.35rem 1rem;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .cinema-btn:hover {
+      background: #444;
+    }
+
+    .cinema-time {
+      font-size: 0.8rem;
+      color: #888;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="/">home</a>
+      <a href="/eeg-demo">eeg demo</a>
+      <a href="/contact">contact</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <section class="project-header">
+      <h1>Visualization Options</h1>
+      <p class="project-subtitle">Comparing three approaches for the EEG brain activity panel. Sample: orange (idx 124).</p>
+    </section>
+
+    <hr>
+
+    <!-- ===== OPTION A ===== -->
+    <section class="viz-section">
+      <h2>Option A: Animated Waveforms</h2>
+      <p>The original style you liked. 8 visual cortex channels on a dark background, scrolling in real time. Clean and techy.</p>
+      <div class="viz-card">
+        <div class="viz-label">Brain Activity &mdash; 8 Visual Cortex Channels</div>
+        <canvas class="waveform-canvas" id="canvasA"></canvas>
+      </div>
+    </section>
+
+    <!-- ===== OPTION B ===== -->
+    <section class="viz-section">
+      <h2>Option B: Interactive Head Map</h2>
+      <p>Click a brain region to see its waveforms. Electrode dots glow based on signal strength. Combines spatial context with signal detail.</p>
+      <div class="viz-card">
+        <div class="headmap-layout">
+          <div class="headmap-left">
+            <svg class="headmap-svg" viewBox="0 0 300 320" id="headSvg"></svg>
+          </div>
+          <div class="headmap-right">
+            <div class="region-label" id="regionLabel">Visual Cortex</div>
+            <canvas id="canvasB" height="260"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== OPTION C ===== -->
+    <section class="viz-section">
+      <h2>Option C: Cinematic Sequence</h2>
+      <p>Tells the story: image flashes, brain responds, reconstruction emerges. Waveforms ripple as the AI "decodes" the signal.</p>
+      <div class="viz-card">
+        <canvas class="cinema-canvas" id="canvasC"></canvas>
+        <div class="cinema-controls">
+          <button class="cinema-btn" id="replayBtn">Replay</button>
+          <span class="cinema-time" id="cinemaTime">0 ms</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p><a href="/">Aaron Jacobson</a></p>
+  </footer>
+
+  <script>
+    // ===== Shared: generate realistic EEG-like data =====
+    function seededRand(seed) {
+      let s = seed;
+      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+    }
+
+    const chNames = ["O1", "Oz", "O2", "PO3", "POz", "PO4", "PO7", "PO8"];
+    const chColors = ["#6ec6ff","#5eb8ff","#4eaaff","#ff8a80","#ff7070","#a0e87a","#80d860","#ffcc56"];
+
+    // Generate deterministic wave params for sample 124
+    const rand = seededRand(124 * 137);
+    const waveParams = chNames.map(() => ({
+      tA: 0.2+rand()*0.4, tF: 4+rand()*4,
+      aA: 0.3+rand()*0.5, aF: 8+rand()*5,
+      bA: 0.1+rand()*0.3, bF: 13+rand()*17,
+      gA: 0.05+rand()*0.15, gF: 30+rand()*30,
+      ph: rand()*Math.PI*2, nL: 0.08+rand()*0.12,
+      p1: 0.3+rand()*0.5, n1: 0.2+rand()*0.4
+    }));
+
+    function eegSignal(d, t, tLocal) {
+      let v = 0;
+      v += d.tA * Math.sin(2*Math.PI*d.tF*t + d.ph);
+      v += d.aA * Math.sin(2*Math.PI*d.aF*t + d.ph*1.3);
+      v += d.bA * Math.sin(2*Math.PI*d.bF*t + d.ph*0.7);
+      v += d.gA * Math.sin(2*Math.PI*d.gF*t + d.ph*2.1);
+      // Evoked responses
+      v += d.p1 * Math.exp(-Math.pow((tLocal-0.1)/0.02,2)) * Math.sin(2*Math.PI*10*tLocal);
+      v -= d.n1 * Math.exp(-Math.pow((tLocal-0.17)/0.025,2)) * Math.sin(2*Math.PI*8*tLocal);
+      v += (Math.random()-0.5) * d.nL * 2;
+      return Math.max(-1, Math.min(1, v/1.5));
+    }
+
+    // ===== OPTION A: Animated Waveforms =====
+    (function() {
+      const canvas = document.getElementById('canvasA');
+      const ctx = canvas.getContext('2d');
+      let start = 0;
+
+      function draw(now) {
+        if (!start) start = now;
+        const elapsed = (now - start) / 1000;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        const W = rect.width, H = rect.height;
+        const nCh = chNames.length, chH = H / nCh;
+
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(0, 0, W, H);
+
+        for (let ch = 0; ch < nCh; ch++) {
+          const d = waveParams[ch];
+          const yC = chH * ch + chH / 2;
+          const amp = chH / 2 - 4;
+
+          // Grid line
+          ctx.strokeStyle = "rgba(255,255,255,0.06)";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.moveTo(0, chH*(ch+1)); ctx.lineTo(W, chH*(ch+1)); ctx.stroke();
+
+          // Label
+          ctx.fillStyle = "rgba(255,255,255,0.3)";
+          ctx.font = `${Math.max(9,W*0.025)}px "DM Sans",sans-serif`;
+          ctx.fillText(chNames[ch], 6, yC - amp + 12);
+
+          // Waveform
+          ctx.strokeStyle = chColors[ch];
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          for (let px = 0; px < W; px++) {
+            const tLocal = (px/W) * 0.8;
+            const t = tLocal + elapsed * 0.15;
+            const v = eegSignal(d, t, tLocal);
+            const y = yC + v * amp;
+            px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+          }
+          ctx.stroke();
+        }
+
+        // Time labels
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.font = `${Math.max(9,W*0.022)}px "DM Sans",sans-serif`;
+        ctx.fillText("0 ms", 6, H - 6);
+        ctx.fillText("800 ms", W - 50, H - 6);
+
+        // Stimulus onset
+        ctx.strokeStyle = "rgba(255,204,86,0.3)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,H); ctx.stroke();
+        ctx.setLineDash([]);
+
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+    })();
+
+
+    // ===== OPTION B: Interactive Head Map =====
+    (function() {
+      const svg = document.getElementById('headSvg');
+      const canvas = document.getElementById('canvasB');
+      const ctx = canvas.getContext('2d');
+      const regionLabel = document.getElementById('regionLabel');
+
+      // Electrode positions (approximate 10-10 on a circle, top-down view)
+      // Grouped by region
+      const regions = {
+        "Frontal": {
+          color: "#aaa", channels: [],
+          electrodes: [
+            {name:"Fp1",x:120,y:45},{name:"Fp2",x:180,y:45},
+            {name:"F7",x:70,y:95},{name:"F3",x:115,y:95},{name:"Fz",x:150,y:85},{name:"F4",x:185,y:95},{name:"F8",x:230,y:95},
+          ]
+        },
+        "Central": {
+          color: "#bbb", channels: [],
+          electrodes: [
+            {name:"C3",x:100,y:155},{name:"Cz",x:150,y:145},{name:"C4",x:200,y:155},
+            {name:"T7",x:50,y:155},{name:"T8",x:250,y:155},
+          ]
+        },
+        "Parietal": {
+          color: "#ccc", channels: [],
+          electrodes: [
+            {name:"P7",x:75,y:215},{name:"P3",x:115,y:210},{name:"Pz",x:150,y:205},
+            {name:"P4",x:185,y:210},{name:"P8",x:225,y:215},
+          ]
+        },
+        "Visual Cortex": {
+          color: "#ffcc56", channels: [0,1,2,3,4,5,6,7],
+          electrodes: [
+            {name:"PO7",x:90,y:245},{name:"PO3",x:120,y:240},{name:"POz",x:150,y:235},
+            {name:"PO4",x:180,y:240},{name:"PO8",x:210,y:245},
+            {name:"O1",x:120,y:270},{name:"Oz",x:150,y:275},{name:"O2",x:180,y:270},
+          ]
+        }
+      };
+
+      let activeRegion = "Visual Cortex";
+      let activeChannels = regions["Visual Cortex"].channels;
+      let animStart = 0;
+
+      // Draw SVG head
+      // Head outline
+      const ns = "http://www.w3.org/2000/svg";
+
+      // Head circle
+      const head = document.createElementNS(ns, "circle");
+      head.setAttribute("cx", 150); head.setAttribute("cy", 165);
+      head.setAttribute("r", 130); head.setAttribute("fill", "none");
+      head.setAttribute("stroke", "#ddd"); head.setAttribute("stroke-width", "2");
+      svg.appendChild(head);
+
+      // Nose
+      const nose = document.createElementNS(ns, "path");
+      nose.setAttribute("d", "M140 36 L150 20 L160 36");
+      nose.setAttribute("fill", "none"); nose.setAttribute("stroke", "#ddd"); nose.setAttribute("stroke-width", "1.5");
+      svg.appendChild(nose);
+
+      // Ears
+      const earL = document.createElementNS(ns, "path");
+      earL.setAttribute("d", "M20 145 Q10 165 20 185");
+      earL.setAttribute("fill", "none"); earL.setAttribute("stroke", "#ddd"); earL.setAttribute("stroke-width", "1.5");
+      svg.appendChild(earL);
+      const earR = document.createElementNS(ns, "path");
+      earR.setAttribute("d", "M280 145 Q290 165 280 185");
+      earR.setAttribute("fill", "none"); earR.setAttribute("stroke", "#ddd"); earR.setAttribute("stroke-width", "1.5");
+      svg.appendChild(earR);
+
+      // Draw regions
+      Object.entries(regions).forEach(([name, region]) => {
+        const g = document.createElementNS(ns, "g");
+        g.classList.add("region-group");
+        g.style.cursor = "pointer";
+
+        region.electrodes.forEach(e => {
+          const dot = document.createElementNS(ns, "circle");
+          dot.setAttribute("cx", e.x); dot.setAttribute("cy", e.y);
+          dot.setAttribute("r", name === activeRegion ? 6 : 4);
+          dot.setAttribute("fill", name === activeRegion ? region.color : "#ccc");
+          dot.setAttribute("opacity", name === activeRegion ? "1" : "0.5");
+          dot.classList.add("electrode-dot");
+          dot.dataset.region = name;
+          g.appendChild(dot);
+        });
+
+        // Region label
+        const avgX = region.electrodes.reduce((s,e) => s+e.x, 0) / region.electrodes.length;
+        const minY = Math.min(...region.electrodes.map(e => e.y));
+        const label = document.createElementNS(ns, "text");
+        label.setAttribute("x", avgX); label.setAttribute("y", minY - 10);
+        label.setAttribute("text-anchor", "middle");
+        label.classList.add("region-label-svg");
+        label.textContent = name;
+        g.appendChild(label);
+
+        g.addEventListener("click", () => {
+          activeRegion = name;
+          // Generate wave params for non-visual-cortex regions (less active)
+          if (name === "Visual Cortex") {
+            activeChannels = [0,1,2,3,4,5,6,7];
+          } else {
+            activeChannels = region.electrodes.map((_, i) => 100 + i); // placeholder indices
+          }
+          regionLabel.textContent = name;
+
+          // Update dot styles
+          svg.querySelectorAll('.electrode-dot').forEach(d => {
+            const r = d.dataset.region;
+            d.setAttribute("r", r === name ? 6 : 4);
+            d.setAttribute("fill", r === name ? regions[r].color : "#ccc");
+            d.setAttribute("opacity", r === name ? "1" : "0.5");
+          });
+        });
+
+        svg.appendChild(g);
+      });
+
+      // Animate dots (pulsing based on "signal")
+      function pulseDots(now) {
+        const t = now / 1000;
+        svg.querySelectorAll('.electrode-dot').forEach(dot => {
+          const r = dot.dataset.region;
+          if (r === "Visual Cortex") {
+            const pulse = 4 + Math.sin(t * 3 + parseFloat(dot.getAttribute("cx")) * 0.1) * 2;
+            if (r === activeRegion) dot.setAttribute("r", pulse + 1);
+          }
+        });
+        requestAnimationFrame(pulseDots);
+      }
+      requestAnimationFrame(pulseDots);
+
+      // Draw waveforms for active region
+      function drawB(now) {
+        if (!animStart) animStart = now;
+        const elapsed = (now - animStart) / 1000;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        const W = rect.width, H = rect.height;
+
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(0, 0, W, H);
+
+        let drawChNames, drawColors, drawParams;
+        if (activeRegion === "Visual Cortex") {
+          drawChNames = chNames;
+          drawColors = chColors;
+          drawParams = waveParams;
+        } else {
+          // Other regions: fewer channels, lower amplitude
+          const re = regions[activeRegion].electrodes;
+          drawChNames = re.map(e => e.name);
+          drawColors = re.map((_, i) => `hsl(${200+i*30},40%,60%)`);
+          const rr = seededRand(activeRegion.length * 99);
+          drawParams = re.map(() => ({
+            tA:0.1+rr()*0.15, tF:4+rr()*4, aA:0.15+rr()*0.2, aF:8+rr()*5,
+            bA:0.05+rr()*0.1, bF:13+rr()*17, gA:0.02+rr()*0.05, gF:30+rr()*30,
+            ph:rr()*Math.PI*2, nL:0.1+rr()*0.15, p1:0.05+rr()*0.1, n1:0.03+rr()*0.08
+          }));
+        }
+
+        const nCh = drawChNames.length;
+        const chH = H / nCh;
+
+        for (let ch = 0; ch < nCh; ch++) {
+          const d = drawParams[ch];
+          const yC = chH * ch + chH / 2;
+          const amp = chH / 2 - 3;
+
+          ctx.strokeStyle = "rgba(255,255,255,0.06)";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.moveTo(0, chH*(ch+1)); ctx.lineTo(W, chH*(ch+1)); ctx.stroke();
+
+          ctx.fillStyle = "rgba(255,255,255,0.3)";
+          ctx.font = `${Math.max(9,W*0.035)}px "DM Sans",sans-serif`;
+          ctx.fillText(drawChNames[ch], 4, yC - amp + 11);
+
+          ctx.strokeStyle = drawColors[ch];
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          for (let px = 0; px < W; px++) {
+            const tLocal = (px/W) * 0.8;
+            const t = tLocal + elapsed * 0.15;
+            const v = eegSignal(d, t, tLocal);
+            const y = yC + v * amp;
+            px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+          }
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.font = `${Math.max(8,W*0.03)}px "DM Sans",sans-serif`;
+        ctx.fillText("0 ms", 4, H - 4);
+        ctx.fillText("800 ms", W - 46, H - 4);
+
+        requestAnimationFrame(drawB);
+      }
+      requestAnimationFrame(drawB);
+    })();
+
+
+    // ===== OPTION C: Cinematic Sequence =====
+    (function() {
+      const canvas = document.getElementById('canvasC');
+      const ctx = canvas.getContext('2d');
+      const replayBtn = document.getElementById('replayBtn');
+      const timeDisplay = document.getElementById('cinemaTime');
+
+      const gtImg = new Image();
+      gtImg.crossOrigin = "anonymous";
+      gtImg.src = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_GT.png";
+
+      const reconImg = new Image();
+      reconImg.crossOrigin = "anonymous";
+      reconImg.src = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000/idx124_orange_top1_clip0.797_sub-04.png";
+
+      let startTime = 0;
+      let playing = true;
+      const DURATION = 4000; // 4 seconds total
+
+      function restart() {
+        startTime = 0;
+        playing = true;
+      }
+      replayBtn.addEventListener("click", restart);
+
+      function drawC(now) {
+        if (!startTime) startTime = now;
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / DURATION, 1);
+
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        const W = rect.width, H = rect.height;
+
+        // Background
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(0, 0, W, H);
+
+        // Layout: left third = GT flash, middle = waveforms, right third = reconstruction
+        const colW = W / 3;
+        const imgSize = Math.min(colW - 30, H - 80);
+        const imgY = (H - imgSize) / 2;
+
+        // Phase 1 (0-0.15): GT image flashes in
+        const flashPhase = Math.min(progress / 0.15, 1);
+        if (gtImg.complete && gtImg.naturalWidth > 0) {
+          const flashAlpha = flashPhase < 0.5
+            ? flashPhase * 2  // fade in
+            : progress < 0.25 ? 1 : Math.max(0, 1 - (progress - 0.25) / 0.15); // hold then fade
+          ctx.globalAlpha = flashAlpha * 0.9;
+          ctx.drawImage(gtImg, (colW - imgSize) / 2, imgY, imgSize, imgSize);
+          ctx.globalAlpha = 1;
+        }
+
+        // Label
+        ctx.fillStyle = `rgba(255,255,255,${progress < 0.4 ? 0.6 : 0.2})`;
+        ctx.font = `11px "DM Sans",sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("STIMULUS", colW / 2, imgY + imgSize + 20);
+
+        // Phase 2 (0.1-0.8): Waveforms animate in the middle
+        if (progress > 0.08) {
+          const waveProgress = Math.min((progress - 0.08) / 0.7, 1);
+          const waveX = colW + 10;
+          const waveW = colW - 20;
+          const nCh = 8;
+          const chH = (H - 20) / nCh;
+
+          for (let ch = 0; ch < nCh; ch++) {
+            const d = waveParams[ch];
+            const yC = 10 + chH * ch + chH / 2;
+            const amp = chH / 2 - 2;
+
+            // Waveform draws from left to right as time progresses
+            const drawWidth = Math.floor(waveW * waveProgress);
+
+            ctx.strokeStyle = chColors[ch];
+            ctx.lineWidth = 1.2;
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            for (let px = 0; px < drawWidth; px++) {
+              const tLocal = (px / waveW) * 0.8;
+              const v = eegSignal(d, tLocal, tLocal);
+              const y = yC + v * amp;
+              px === 0 ? ctx.moveTo(waveX + px, y) : ctx.lineTo(waveX + px, y);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            // Glow at P100 peak (~100ms = 12.5% of 800ms)
+            if (waveProgress > 0.12) {
+              const peakX = waveX + waveW * 0.125;
+              const peakLocal = 0.1;
+              const peakV = eegSignal(d, peakLocal, peakLocal);
+              const peakY = yC + peakV * amp;
+              const glowIntensity = Math.exp(-Math.pow((waveProgress - 0.15) / 0.08, 2));
+              if (glowIntensity > 0.1) {
+                const glow = ctx.createRadialGradient(peakX, peakY, 0, peakX, peakY, 15);
+                glow.addColorStop(0, `rgba(255,204,86,${glowIntensity * 0.6})`);
+                glow.addColorStop(1, "rgba(255,204,86,0)");
+                ctx.fillStyle = glow;
+                ctx.fillRect(peakX - 15, peakY - 15, 30, 30);
+              }
+            }
+          }
+
+          // P100 / N170 markers
+          if (waveProgress > 0.12) {
+            const p100x = waveX + waveW * 0.125;
+            ctx.strokeStyle = "rgba(255,204,86,0.3)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2,2]);
+            ctx.beginPath(); ctx.moveTo(p100x, 5); ctx.lineTo(p100x, H-15); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = "rgba(255,204,86,0.5)";
+            ctx.font = "9px 'DM Sans',sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("P100", p100x, H - 5);
+          }
+          if (waveProgress > 0.22) {
+            const n170x = waveX + waveW * 0.2125;
+            ctx.strokeStyle = "rgba(255,140,86,0.3)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2,2]);
+            ctx.beginPath(); ctx.moveTo(n170x, 5); ctx.lineTo(n170x, H-15); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = "rgba(255,140,86,0.5)";
+            ctx.font = "9px 'DM Sans',sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("N170", n170x, H - 5);
+          }
+        }
+
+        // Phase 3 (0.3-1.0): Reconstruction fades in from blur
+        if (progress > 0.3 && reconImg.complete && reconImg.naturalWidth > 0) {
+          const reconProgress = Math.min((progress - 0.3) / 0.5, 1);
+          const reconX = colW * 2 + (colW - imgSize) / 2;
+
+          // Fade in
+          ctx.globalAlpha = reconProgress;
+
+          // Apply blur effect that reduces over time
+          if (reconProgress < 1) {
+            ctx.filter = `blur(${(1 - reconProgress) * 12}px)`;
+          }
+          ctx.drawImage(reconImg, reconX, imgY, imgSize, imgSize);
+          ctx.filter = "none";
+          ctx.globalAlpha = 1;
+
+          // Score emerges
+          if (reconProgress > 0.6) {
+            const scoreAlpha = (reconProgress - 0.6) / 0.4;
+            ctx.fillStyle = `rgba(255,255,255,${scoreAlpha * 0.7})`;
+            ctx.font = `bold 14px "DM Sans",sans-serif`;
+            ctx.textAlign = "center";
+            const scoreVal = (0.797 * Math.min(1, (reconProgress - 0.6) / 0.3)).toFixed(3);
+            ctx.fillText(`CLIP: ${scoreVal}`, reconX + imgSize/2, imgY + imgSize + 20);
+          }
+        }
+
+        // Reconstruction label
+        ctx.fillStyle = `rgba(255,255,255,${progress > 0.5 ? 0.2 : 0.1})`;
+        ctx.font = `11px "DM Sans",sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("RECONSTRUCTION", colW * 2 + colW / 2, imgY - 10);
+
+        // Time display
+        const simTime = Math.round(progress * 800);
+        timeDisplay.textContent = `${simTime} ms`;
+
+        // Loop after a pause
+        if (progress >= 1 && elapsed > DURATION + 1500) {
+          startTime = 0;
+        }
+
+        requestAnimationFrame(drawC);
+      }
+      requestAnimationFrame(drawC);
+    })();
+  </script>
+
+</body>
+</html>
