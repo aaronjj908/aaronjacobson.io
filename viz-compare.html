@@ -41,6 +41,84 @@
     .electrode-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 6px; fill: #bbb; pointer-events: none; text-anchor: middle; }
     .region-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 8px; fill: #999; pointer-events: none; }
 
+    /* Explorer section */
+    .explorer-card {
+      background: #fff;
+      border: 1px solid #e5e2dc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .explorer-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 360px;
+    }
+
+    .explorer-head {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid #eee;
+    }
+
+    .explorer-head svg {
+      width: 100%;
+      max-width: 240px;
+    }
+
+    .explorer-legend {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1rem;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+      color: #888;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .explorer-wave {
+      background: #1a1a2e;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .explorer-wave-label {
+      color: rgba(255,255,255,0.5);
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+
+    .explorer-wave-sub {
+      color: rgba(255,255,255,0.2);
+      font-size: 0.7rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .explorer-layout { grid-template-columns: 1fr; }
+      .explorer-head { border-right: none; border-bottom: 1px solid #eee; }
+    }
+
     @media (max-width: 600px) {
       .demo-pipeline { grid-template-columns: 1fr; gap: 1.25rem; }
       .headmap-inline { grid-template-columns: 1fr; }
@@ -153,16 +231,17 @@
     </div>
   </section>
 
-  <!-- OPTION 4: Playback -->
+  <!-- OPTION 4: Playback + Explorer below -->
   <section class="viz-section">
-    <h2>4: Temporal Playback</h2>
-    <p>Replays the 800ms recording in slow motion. A cursor sweeps across as the waveform draws itself, showing the brain response unfolding in real time. Glows at P100/N170 peaks. Loops after a pause.</p>
+    <h2>4: Playback + Brain Explorer Below</h2>
+    <p>Clean demo card with temporal playback (visual cortex only). Scroll down for the full interactive brain explorer with room to breathe.</p>
+
+    <!-- Demo card: clean, no region tabs -->
     <div class="demo-card">
       <div class="demo-pipeline">
         <div class="demo-step">
-          <div class="pipeline-label">Brain Activity &mdash; <span id="playback-time">0 ms</span></div>
+          <div class="pipeline-label">Brain Activity &mdash; Visual Cortex &mdash; <span id="playback-time">0 ms</span></div>
           <canvas class="brain-canvas" id="canvas4" style="height:260px;"></canvas>
-          <div class="region-pills" id="pills4"></div>
         </div>
         <div class="demo-step">
           <div class="pipeline-label">AI Reconstruction</div>
@@ -177,6 +256,30 @@
         <span class="score-label">CLIP Similarity</span>
         <div class="score-bar-bg"><div class="score-bar-fill" style="width:79.7%"></div></div>
         <span class="score-value">0.797</span>
+      </div>
+    </div>
+
+    <!-- Brain explorer: separate, spacious -->
+    <h2 style="margin-top:2.5rem;">Explore the Full Brain Response</h2>
+    <p>Click any electrode on the head map to see that channel's signal. The visual cortex (back of the head) shows the strongest response.</p>
+    <div class="explorer-card">
+      <div class="explorer-layout">
+        <div class="explorer-head">
+          <svg viewBox="0 0 300 320" id="headSvg4"></svg>
+          <div class="explorer-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#ffcc56"></span>Visual Cortex</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#88bbdd"></span>Parietal</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#88aacc"></span>Centro-Parietal</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#aa99cc"></span>Central-Temporal</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#bb8899"></span>Frontal-Central</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#cc9988"></span>Frontal</div>
+          </div>
+        </div>
+        <div class="explorer-wave">
+          <div class="explorer-wave-label" id="explorer-label">Oz &mdash; Visual Cortex</div>
+          <canvas id="canvas4explorer" style="width:100%;height:240px;"></canvas>
+          <div class="explorer-wave-sub">800ms recording &mdash; click any electrode to explore</div>
+        </div>
       </div>
     </div>
   </section>
@@ -587,134 +690,151 @@ function drawW(x,W,H,el,chList,opts={}){
   requestAnimationFrame(draw);
 })();
 
-// ===== OPTION 4: Temporal Playback =====
+// ===== OPTION 4: Playback (visual cortex only) + Explorer =====
 (function(){
-  const cv=document.getElementById('canvas4'), pills=document.getElementById('pills4');
+  const cv=document.getElementById('canvas4');
   const timeLabel=document.getElementById('playback-time');
-  let activeRegion="Visual Cortex", startTime=0;
-  const PLAYBACK_DURATION = 2500; // 2.5s to play 800ms (slowed ~3x)
-  const PAUSE_DURATION = 1500; // pause before loop
+  const cvExplorer=document.getElementById('canvas4explorer');
+  const explorerLabel=document.getElementById('explorer-label');
+  let startTime=0;
+  let activeElectrode="Oz";
+  const PLAYBACK_DURATION = 2500;
+  const PAUSE_DURATION = 1500;
+  const vcChannels = ALL_CHANNELS.filter(c=>c.region==="Visual Cortex");
 
-  // Build region pills
-  REGION_NAMES.forEach(name=>{
-    const count = ALL_CHANNELS.filter(c=>c.region===name).length;
-    const btn=document.createElement('button');
-    btn.className='region-pill'+(name==="Visual Cortex"?' active':'');
-    btn.textContent=name;
-    btn.dataset.region=name;
-    btn.onclick=()=>{
-      activeRegion=name;
-      pills.querySelectorAll('.region-pill').forEach(b=>b.classList.toggle('active',b.dataset.region===name));
-      const h = Math.max(200, Math.min(400, count*24));
-      cv.style.height = h+'px';
-      startTime=0; // restart playback
-    };
-    pills.appendChild(btn);
+  // Build head map for explorer
+  const svg=document.getElementById('headSvg4');
+  const ns="http://www.w3.org/2000/svg";
+  [{tag:"circle",a:{cx:150,cy:165,r:130,fill:"none",stroke:"#ddd","stroke-width":1.5}},
+   {tag:"path",a:{d:"M140 36 L150 22 L160 36",fill:"none",stroke:"#ddd","stroke-width":1.2}},
+   {tag:"path",a:{d:"M20 145 Q12 165 20 185",fill:"none",stroke:"#ddd","stroke-width":1.2}},
+   {tag:"path",a:{d:"M280 145 Q288 165 280 185",fill:"none",stroke:"#ddd","stroke-width":1.2}}
+  ].forEach(e=>{const el=document.createElementNS(ns,e.tag);Object.entries(e.a).forEach(([k,v])=>el.setAttribute(k,v));svg.appendChild(el);});
+
+  ALL_CHANNELS.forEach(ch=>{
+    const dot=document.createElementNS(ns,"circle");
+    dot.setAttribute("cx",ch.x);dot.setAttribute("cy",ch.y);
+    dot.setAttribute("r",ch.name===activeElectrode?6:3.5);
+    dot.setAttribute("fill",ch.name===activeElectrode?REGION_COLORS[ch.region]:"#ccc");
+    dot.setAttribute("opacity",ch.name===activeElectrode?"1":"0.4");
+    dot.classList.add("electrode-dot");dot.dataset.name=ch.name;dot.dataset.region=ch.region;
+
+    dot.addEventListener("mouseenter",()=>{
+      if(ch.name!==activeElectrode){dot.setAttribute("r","5");dot.setAttribute("opacity","0.7");dot.setAttribute("fill",REGION_COLORS[ch.region]);}
+    });
+    dot.addEventListener("mouseleave",()=>{
+      if(ch.name!==activeElectrode){dot.setAttribute("r","3.5");dot.setAttribute("opacity","0.4");dot.setAttribute("fill","#ccc");}
+    });
+    dot.addEventListener("click",()=>{
+      activeElectrode=ch.name;
+      explorerLabel.innerHTML=`${ch.name} &mdash; ${ch.region}`;
+      svg.querySelectorAll('.electrode-dot').forEach(d=>{
+        const isA=d.dataset.name===ch.name;
+        d.setAttribute("r",isA?6:3.5);d.setAttribute("fill",isA?REGION_COLORS[d.dataset.region]:"#ccc");d.setAttribute("opacity",isA?"1":"0.4");
+      });
+    });
+    svg.appendChild(dot);
+
+    // Tiny label
+    const lbl=document.createElementNS(ns,"text");
+    lbl.setAttribute("x",ch.x);lbl.setAttribute("y",ch.y-6);
+    lbl.classList.add("electrode-label-svg");lbl.textContent=ch.name;
+    svg.appendChild(lbl);
   });
+
+  // Pulse visual cortex dots
+  (function pulse(now){const t=now/1000;svg.querySelectorAll('.electrode-dot').forEach(d=>{
+    if(d.dataset.region==="Visual Cortex"&&d.dataset.name!==activeElectrode){
+      const p=3.5+Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*1;
+      d.setAttribute("r",p);d.setAttribute("opacity",0.3+Math.sin(t*3+parseFloat(d.getAttribute("cx"))*.1)*.15);
+      d.setAttribute("fill",REGION_COLORS["Visual Cortex"]);
+    }
+  });requestAnimationFrame(pulse);})(performance.now());
 
   function draw(now){
     if(!startTime) startTime=now;
     const elapsed = now - startTime;
     const totalCycle = PLAYBACK_DURATION + PAUSE_DURATION;
     const cyclePos = elapsed % totalCycle;
-    const playProgress = Math.min(cyclePos / PLAYBACK_DURATION, 1); // 0 to 1
+    const playProgress = Math.min(cyclePos / PLAYBACK_DURATION, 1);
     const simTimeMs = Math.round(playProgress * 800);
-
     timeLabel.textContent = playProgress < 1 ? `${simTimeMs} ms` : '800 ms';
 
+    // ---- Playback canvas (visual cortex only) ----
     const dpr=window.devicePixelRatio||1, rc=cv.getBoundingClientRect();
     cv.width=rc.width*dpr; cv.height=rc.height*dpr;
     const x=cv.getContext('2d'); x.scale(dpr,dpr);
     const W=rc.width, H=rc.height;
-
-    const chs = ALL_CHANNELS.filter(c=>c.region===activeRegion);
-    const n=chs.length, cH=H/n;
-    const isVisual = activeRegion==="Visual Cortex";
+    const n=vcChannels.length, cH=H/n;
 
     x.fillStyle="#1a1a2e"; x.fillRect(0,0,W,H);
-
-    // How far across the canvas to draw (based on playback progress)
     const drawLimit = Math.floor(W * playProgress);
 
     for(let i=0;i<n;i++){
-      const ch=chs[i], d=channelParams[ch.name]; if(!d) continue;
+      const ch=vcChannels[i], d=channelParams[ch.name]; if(!d) continue;
       const yC=cH*i+cH/2, a=cH/2-2;
-      const col=REGION_COLORS[activeRegion];
 
-      // Grid line
       x.strokeStyle="rgba(255,255,255,0.05)";x.lineWidth=.5;
       x.beginPath();x.moveTo(0,cH*(i+1));x.lineTo(W,cH*(i+1));x.stroke();
 
-      // Channel label
-      if(n<=20){
-        x.fillStyle="rgba(255,255,255,0.3)";
-        x.font=`${Math.max(7,Math.min(10,cH*.4))}px "DM Sans",sans-serif`;
-        x.fillText(ch.name,4,yC-a+Math.max(8,cH*.35));
-      }
+      x.fillStyle="rgba(255,255,255,0.3)";x.font=`${Math.max(7,Math.min(10,cH*.4))}px "DM Sans",sans-serif`;
+      x.fillText(ch.name,4,yC-a+Math.max(8,cH*.35));
 
-      // Draw waveform up to current playback position
-      x.strokeStyle=col; x.lineWidth=n>12?0.8:1.2; x.beginPath();
-      for(let p=0;p<drawLimit;p++){
-        const tL=(p/W)*.8, v=es(d,tL), y=yC+v*a;
-        p===0?x.moveTo(p,y):x.lineTo(p,y);
-      }
+      x.strokeStyle=REGION_COLORS["Visual Cortex"]; x.lineWidth=1.2; x.beginPath();
+      for(let p=0;p<drawLimit;p++){const tL=(p/W)*.8,v=es(d,tL),y=yC+v*a;p===0?x.moveTo(p,y):x.lineTo(p,y);}
       x.stroke();
 
-      // Glow at P100 (~100ms = 12.5% of 800ms)
-      if(isVisual){
-        const p100px = W*0.125;
-        if(drawLimit > p100px){
-          const distFromCursor = Math.abs(drawLimit - p100px) / W;
-          const gi = Math.exp(-Math.pow(distFromCursor/.04,2));
-          if(gi>.05){
-            const pv=es(d,0.1), py=yC+pv*a;
-            const g=x.createRadialGradient(p100px,py,0,p100px,py,16);
-            g.addColorStop(0,`rgba(255,220,100,${gi*.7})`);g.addColorStop(1,"rgba(255,220,100,0)");
-            x.fillStyle=g;x.fillRect(p100px-16,py-16,32,32);
-          }
-        }
-        // Glow at N170 (~170ms = 21.25% of 800ms)
-        const n170px = W*0.2125;
-        if(drawLimit > n170px){
-          const distFromCursor = Math.abs(drawLimit - n170px) / W;
-          const gi = Math.exp(-Math.pow(distFromCursor/.04,2));
-          if(gi>.05){
-            const pv=es(d,0.17), py=yC+pv*a;
-            const g=x.createRadialGradient(n170px,py,0,n170px,py,16);
-            g.addColorStop(0,`rgba(255,150,80,${gi*.6})`);g.addColorStop(1,"rgba(255,150,80,0)");
-            x.fillStyle=g;x.fillRect(n170px-16,py-16,32,32);
-          }
-        }
-      }
-    }
-
-    // Playhead cursor
-    if(playProgress < 1){
-      x.strokeStyle="rgba(255,255,255,0.4)";x.lineWidth=1;
-      x.beginPath();x.moveTo(drawLimit,0);x.lineTo(drawLimit,H);x.stroke();
-      // Cursor glow
-      const cg=x.createLinearGradient(drawLimit-8,0,drawLimit+2,0);
-      cg.addColorStop(0,"rgba(255,255,255,0)");cg.addColorStop(1,"rgba(255,255,255,0.05)");
-      x.fillStyle=cg;x.fillRect(drawLimit-8,0,10,H);
-    }
-
-    // P100/N170 marker lines (appear once cursor passes them)
-    if(isVisual){
-      [{px:W*.125,l:"P100",c:"255,220,100"},{px:W*.2125,l:"N170",c:"255,150,80"}].forEach(m=>{
-        if(drawLimit > m.px){
-          x.strokeStyle=`rgba(${m.c},.2)`;x.lineWidth=1;x.setLineDash([2,2]);
-          x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
-          x.fillStyle=`rgba(${m.c},.5)`;x.font=`bold 8px "DM Sans",sans-serif`;
-          x.textAlign="center";x.fillText(m.l,m.px,9);x.textAlign="start";
-        }
+      // Glow at peaks
+      [{px:W*.125,tL:.1,c:"255,220,100"},{px:W*.2125,tL:.17,c:"255,150,80"}].forEach(m=>{
+        if(drawLimit>m.px){const dist=Math.abs(drawLimit-m.px)/W,gi=Math.exp(-Math.pow(dist/.04,2));
+          if(gi>.05){const pv=es(d,m.tL),py=yC+pv*a,g=x.createRadialGradient(m.px,py,0,m.px,py,14);
+            g.addColorStop(0,`rgba(${m.c},${gi*.7})`);g.addColorStop(1,`rgba(${m.c},0)`);x.fillStyle=g;x.fillRect(m.px-14,py-14,28,28);}}
       });
     }
 
-    // Time axis
-    x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;
-    x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
-    // Channel count
-    x.fillStyle="rgba(255,255,255,0.12)";x.font=`8px "DM Sans",sans-serif`;x.textAlign="end";x.fillText(`${n} ch`,W-4,12);x.textAlign="start";
+    // Playhead
+    if(playProgress<1){x.strokeStyle="rgba(255,255,255,0.4)";x.lineWidth=1;x.beginPath();x.moveTo(drawLimit,0);x.lineTo(drawLimit,H);x.stroke();
+      const cg=x.createLinearGradient(drawLimit-8,0,drawLimit+2,0);cg.addColorStop(0,"rgba(255,255,255,0)");cg.addColorStop(1,"rgba(255,255,255,0.05)");x.fillStyle=cg;x.fillRect(drawLimit-8,0,10,H);}
+
+    // Markers
+    [{px:W*.125,l:"P100",c:"255,220,100"},{px:W*.2125,l:"N170",c:"255,150,80"}].forEach(m=>{
+      if(drawLimit>m.px){x.strokeStyle=`rgba(${m.c},.2)`;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(m.px,0);x.lineTo(m.px,H);x.stroke();x.setLineDash([]);
+        x.fillStyle=`rgba(${m.c},.5)`;x.font=`bold 8px "DM Sans",sans-serif`;x.textAlign="center";x.fillText(m.l,m.px,9);x.textAlign="start";}
+    });
+    x.fillStyle="rgba(255,255,255,0.15)";x.font=`8px "DM Sans",sans-serif`;x.fillText("0ms",4,H-2);x.textAlign="end";x.fillText("800ms",W-4,H-2);x.textAlign="start";
+
+    // ---- Explorer canvas (single electrode, static with subtle glow) ----
+    const rc2=cvExplorer.getBoundingClientRect();
+    cvExplorer.width=rc2.width*dpr; cvExplorer.height=rc2.height*dpr;
+    const x2=cvExplorer.getContext('2d'); x2.scale(dpr,dpr);
+    const W2=rc2.width, H2=rc2.height;
+    const d2=channelParams[activeElectrode];
+    if(d2){
+      const eCh=ALL_CHANNELS.find(c=>c.name===activeElectrode);
+      const isVC=eCh&&eCh.region==="Visual Cortex";
+      const col2=eCh?REGION_COLORS[eCh.region]:"#888";
+
+      x2.fillStyle="#1a1a2e";x2.fillRect(0,0,W2,H2);
+      const yC2=H2/2, a2=H2/2-16;
+
+      x2.strokeStyle="rgba(255,255,255,0.04)";x2.lineWidth=.5;x2.beginPath();x2.moveTo(0,yC2);x2.lineTo(W2,yC2);x2.stroke();
+
+      x2.strokeStyle=col2;x2.lineWidth=2;x2.beginPath();
+      for(let p=0;p<W2;p++){const tL=(p/W2)*.8,v=es(d2,tL),y=yC2+v*a2;p===0?x2.moveTo(p,y):x2.lineTo(p,y);}
+      x2.stroke();
+      x2.lineTo(W2,yC2);x2.lineTo(0,yC2);x2.closePath();x2.globalAlpha=0.08;x2.fillStyle=col2;x2.fill();x2.globalAlpha=1;
+
+      if(isVC){const glowPhase=(elapsed/1000%3)/3;
+        [{px:W2*.125,tL:.1,t:.3,c:"255,220,100",l:"P100"},{px:W2*.2125,tL:.17,t:.6,c:"255,150,80",l:"N170"}].forEach(m=>{
+          const pv=es(d2,m.tL),py=yC2+pv*a2,gi=Math.exp(-Math.pow((glowPhase-m.t)/.12,2));
+          if(gi>.05){const g=x2.createRadialGradient(m.px,py,0,m.px,py,20);g.addColorStop(0,`rgba(${m.c},${gi*.6})`);g.addColorStop(1,`rgba(${m.c},0)`);x2.fillStyle=g;x2.fillRect(m.px-20,py-20,40,40);}
+          x2.strokeStyle=`rgba(${m.c},${.12+gi*.3})`;x2.lineWidth=1;x2.setLineDash([2,2]);x2.beginPath();x2.moveTo(m.px,0);x2.lineTo(m.px,H2);x2.stroke();x2.setLineDash([]);
+          x2.fillStyle=`rgba(${m.c},${.3+gi*.5})`;x2.font=`bold 9px "DM Sans",sans-serif`;x2.textAlign="center";x2.fillText(m.l,m.px,12);x2.textAlign="start";
+        });
+      }
+      x2.fillStyle="rgba(255,255,255,0.35)";x2.font=`11px "DM Sans",sans-serif`;x2.fillText(activeElectrode,6,16);
+      x2.fillStyle="rgba(255,255,255,0.15)";x2.font=`8px "DM Sans",sans-serif`;x2.fillText("0ms",4,H2-3);x2.textAlign="end";x2.fillText("800ms",W2-4,H2-3);x2.textAlign="start";
+    }
 
     requestAnimationFrame(draw);
   }
