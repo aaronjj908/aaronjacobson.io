@@ -301,15 +301,15 @@
     ALL_CH.forEach(ch=>{
       const dot=document.createElementNS(ns,"circle");
       dot.setAttribute("cx",ch.x);dot.setAttribute("cy",ch.y);
-      dot.setAttribute("r",ch.n===activeElectrode?6:3.5);
-      dot.setAttribute("fill",ch.n===activeElectrode?RC[ch.r]:"#ccc");
-      dot.setAttribute("opacity",ch.n===activeElectrode?"1":"0.4");
+      dot.setAttribute("r",ch.n===activeElectrode?6:4);
+      dot.setAttribute("fill",RC[ch.r]);
+      dot.setAttribute("opacity",ch.n===activeElectrode?"1":"0.5");
       dot.classList.add("electrode-dot");dot.dataset.name=ch.n;dot.dataset.region=ch.r;
-      dot.addEventListener("mouseenter",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","5");dot.setAttribute("opacity","0.7");dot.setAttribute("fill",RC[ch.r]);}});
-      dot.addEventListener("mouseleave",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","3.5");dot.setAttribute("opacity","0.4");dot.setAttribute("fill","#ccc");}});
+      dot.addEventListener("mouseenter",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","5.5");dot.setAttribute("opacity","0.85");}});
+      dot.addEventListener("mouseleave",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","4");dot.setAttribute("opacity","0.5");}});
       dot.addEventListener("click",()=>{
         activeElectrode=ch.n;expLabel.innerHTML=`${ch.n} &mdash; ${ch.r}`;
-        svg.querySelectorAll('.electrode-dot').forEach(d=>{const a=d.dataset.name===ch.n;d.setAttribute("r",a?6:3.5);d.setAttribute("fill",a?RC[d.dataset.region]:"#ccc");d.setAttribute("opacity",a?"1":"0.4");});
+        svg.querySelectorAll('.electrode-dot').forEach(d=>{const a=d.dataset.name===ch.n;d.setAttribute("r",a?6:4);d.setAttribute("opacity",a?"1":"0.5");});
       });
       svg.appendChild(dot);
       const lbl=document.createElementNS(ns,"text");lbl.setAttribute("x",ch.x);lbl.setAttribute("y",ch.y-6);lbl.classList.add("electrode-label-svg");lbl.textContent=ch.n;svg.appendChild(lbl);
