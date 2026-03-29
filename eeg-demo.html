@@ -146,7 +146,7 @@
         </div>
       </div>
 
-      <h2>Explore the Full Brain Response <span id="explorerSampleName" style="color:#888;font-size:0.7em;font-style:italic"></span></h2>
+      <h2>Explore the Full Brain Response</h2>
       <p>The model uses all 63 EEG channels as input. Click any electrode on the head map to see that channel's recorded signal.</p>
 
       <div class="explorer-card">
@@ -241,8 +241,6 @@
       document.getElementById("scoreValue").textContent=s.score.toFixed(3);
       const bar=document.getElementById("scoreBar");bar.style.width=Math.round(s.score*100)+"%";bar.style.background=scoreColor(s.score);
       document.querySelectorAll(".sample-btn").forEach((b,i)=>b.classList.toggle("active",i===index));
-      // Update explorer heading
-      document.getElementById("explorerSampleName").textContent="— "+s.cat;
       // Flash explorer card
       const card=document.querySelector(".explorer-card");
       card.classList.add("flash");
