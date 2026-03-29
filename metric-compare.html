@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metric Comparison</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    main { max-width: 960px; }
+    .metric-section { margin-bottom: 3rem; }
+    .metric-section > p { font-size: 0.95rem; color: #666; margin-bottom: 1rem; max-width: 600px; }
+    .sample-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .sample-btn { background: none; border: 1px solid #ddd; border-radius: 100px; padding: 0.3rem 0.75rem; font-family: "DM Sans", system-ui, sans-serif; font-size: 0.78rem; color: #666; cursor: pointer; transition: all 0.2s; }
+    .sample-btn:hover { border-color: #aaa; color: #222; }
+    .sample-btn.active { background: #222; border-color: #222; color: #fff; }
+    .demo-card { background: #fff; border: 1px solid #e5e2dc; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+    .demo-pipeline { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .demo-step { text-align: center; }
+    .demo-step img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: #e5e2dc; }
+    .pipeline-label { font-family: "DM Sans", system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 0.6rem; }
+    .score-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
+    .score-label { font-size: 0.8rem; font-weight: 500; color: #888; white-space: nowrap; }
+    .score-bar-bg { flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; }
+    .score-value { font-size: 0.85rem; font-weight: 600; color: #222; font-variant-numeric: tabular-nums; min-width: 3rem; text-align: right; }
+    @media (max-width: 600px) { .demo-pipeline { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header><nav>
+  <a href="/">home</a>
+  <a href="/eeg-demo">eeg demo</a>
+  <a href="/contact">contact</a>
+</nav></header>
+
+<main>
+  <section class="project-header">
+    <h1>Metric Comparison</h1>
+    <p class="project-subtitle">Top 20 reconstructions ranked by three different similarity metrics.</p>
+  </section>
+  <hr>
+
+  <section class="metric-section">
+    <h2>CLIP Similarity (Semantic)</h2>
+    <p>Does the reconstruction capture the right <em>meaning</em>? Higher is better.</p>
+    <div class="sample-nav" id="navCLIP"></div>
+    <div class="demo-card">
+      <div class="demo-pipeline">
+        <div class="demo-step"><div class="pipeline-label">AI Reconstruction</div><img id="reconCLIP" src="" alt=""></div>
+        <div class="demo-step"><div class="pipeline-label">Ground Truth</div><img id="gtCLIP" src="" alt=""></div>
+      </div>
+      <div class="score-row">
+        <span class="score-label">CLIP Similarity</span>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="barCLIP"></div></div>
+        <span class="score-value" id="valCLIP"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="metric-section">
+    <h2>LPIPS (Perceptual Distance)</h2>
+    <p>Does it <em>look</em> like the original to a human? Lower is better (it's a distance).</p>
+    <div class="sample-nav" id="navLPIPS"></div>
+    <div class="demo-card">
+      <div class="demo-pipeline">
+        <div class="demo-step"><div class="pipeline-label">AI Reconstruction</div><img id="reconLPIPS" src="" alt=""></div>
+        <div class="demo-step"><div class="pipeline-label">Ground Truth</div><img id="gtLPIPS" src="" alt=""></div>
+      </div>
+      <div class="score-row">
+        <span class="score-label">LPIPS Distance</span>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="barLPIPS"></div></div>
+        <span class="score-value" id="valLPIPS"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="metric-section">
+    <h2>SSIM (Structural Similarity)</h2>
+    <p>Does the pixel-level structure match? Higher is better.</p>
+    <div class="sample-nav" id="navSSIM"></div>
+    <div class="demo-card">
+      <div class="demo-pipeline">
+        <div class="demo-step"><div class="pipeline-label">AI Reconstruction</div><img id="reconSSIM" src="" alt=""></div>
+        <div class="demo-step"><div class="pipeline-label">Ground Truth</div><img id="gtSSIM" src="" alt=""></div>
+      </div>
+      <div class="score-row">
+        <span class="score-label">SSIM</span>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="barSSIM"></div></div>
+        <span class="score-value" id="valSSIM"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><p><a href="/">Aaron Jacobson</a></p></footer>
+
+<script>
+const REPO = "https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/top50_1000";
+
+const topCLIP = [
+  {idx:"124",cat:"orange",score:0.797,gt:"idx124_orange_GT.png",recon:"idx124_orange_top1_clip0.797_sub-04.png"},
+  {idx:"151",cat:"rooster",score:0.794,gt:"idx151_rooster_GT.png",recon:"idx151_rooster_top1_clip0.794_sub-01.png"},
+  {idx:"086",cat:"gopher",score:0.776,gt:"idx086_gopher_GT.png",recon:"idx086_gopher_top1_clip0.776_sub-09.png"},
+  {idx:"011",cat:"beaver",score:0.757,gt:"idx011_beaver_GT.png",recon:"idx011_beaver_top1_clip0.757_sub-05.png"},
+  {idx:"147",cat:"raspberry",score:0.752,gt:"idx147_raspberry_GT.png",recon:"idx147_raspberry_top1_clip0.752_sub-08.png"},
+  {idx:"100",cat:"jelly bean",score:0.743,gt:"idx100_jelly_bean_GT.png",recon:"idx100_jelly_bean_top1_clip0.743_sub-03.png"},
+  {idx:"001",cat:"antelope",score:0.743,gt:"idx001_antelope_GT.png",recon:"idx001_antelope_top1_clip0.743_sub-09.png"},
+  {idx:"141",cat:"possum",score:0.742,gt:"idx141_possum_GT.png",recon:"idx141_possum_top1_clip0.742_sub-04.png"},
+  {idx:"057",cat:"crow",score:0.731,gt:"idx057_crow_GT.png",recon:"idx057_crow_top1_clip0.731_sub-01.png"},
+  {idx:"105",cat:"lamb",score:0.729,gt:"idx105_lamb_GT.png",recon:"idx105_lamb_top1_clip0.729_sub-01.png"},
+  {idx:"062",cat:"dalmatian",score:0.713,gt:"idx062_dalmatian_GT.png",recon:"idx062_dalmatian_top1_clip0.713_sub-04.png"},
+  {idx:"108",cat:"lettuce",score:0.706,gt:"idx108_lettuce_GT.png",recon:"idx108_lettuce_top1_clip0.706_sub-03.png"},
+  {idx:"160",cat:"seagull",score:0.702,gt:"idx160_seagull_GT.png",recon:"idx160_seagull_top1_clip0.702_sub-04.png"},
+  {idx:"156",cat:"sausage",score:0.697,gt:"idx156_sausage_GT.png",recon:"idx156_sausage_top1_clip0.697_sub-03.png"},
+  {idx:"130",cat:"pear",score:0.693,gt:"idx130_pear_GT.png",recon:"idx130_pear_top1_clip0.693_sub-04.png"},
+  {idx:"045",cat:"cobra",score:0.686,gt:"idx045_cobra_GT.png",recon:"idx045_cobra_top1_clip0.686_sub-08.png"},
+  {idx:"025",cat:"bullet",score:0.684,gt:"idx025_bullet_GT.png",recon:"idx025_bullet_top1_clip0.684_sub-03.png"},
+  {idx:"038",cat:"cheetah",score:0.679,gt:"idx038_cheetah_GT.png",recon:"idx038_cheetah_top1_clip0.679_sub-05.png"},
+  {idx:"010",cat:"batter",score:0.679,gt:"idx010_batter_GT.png",recon:"idx010_batter_top1_clip0.679_sub-04.png"},
+  {idx:"037",cat:"cheese",score:0.679,gt:"idx037_cheese_GT.png",recon:"idx037_cheese_top1_clip0.679_sub-10.png"},
+];
+
+const topLPIPS = [
+  {idx:"062",cat:"dalmatian",score:0.4732,gt:"idx062_dalmatian_GT.png",recon:"idx062_dalmatian_top1_clip0.713_sub-04.png"},
+  {idx:"005",cat:"baseball bat",score:0.4831,gt:"idx005_baseball_bat_GT.png",recon:"idx005_baseball_bat_top1_clip0.568_sub-07.png"},
+  {idx:"109",cat:"lightning bug",score:0.4871,gt:"idx109_lightning_bug_GT.png",recon:"idx109_lightning_bug_top1_clip0.662_sub-01.png"},
+  {idx:"011",cat:"beaver",score:0.4984,gt:"idx011_beaver_GT.png",recon:"idx011_beaver_top1_clip0.757_sub-05.png"},
+  {idx:"087",cat:"gorilla",score:0.5039,gt:"idx087_gorilla_GT.png",recon:"idx087_gorilla_top1_clip0.599_sub-09.png"},
+  {idx:"130",cat:"pear",score:0.517,gt:"idx130_pear_GT.png",recon:"idx130_pear_top1_clip0.693_sub-04.png"},
+  {idx:"160",cat:"seagull",score:0.5247,gt:"idx160_seagull_GT.png",recon:"idx160_seagull_top1_clip0.702_sub-04.png"},
+  {idx:"151",cat:"rooster",score:0.5262,gt:"idx151_rooster_GT.png",recon:"idx151_rooster_top1_clip0.794_sub-01.png"},
+  {idx:"033",cat:"caterpillar",score:0.5326,gt:"idx033_caterpillar_GT.png",recon:"idx033_caterpillar_top1_clip0.651_sub-02.png"},
+  {idx:"128",cat:"panther",score:0.5346,gt:"idx128_panther_GT.png",recon:"idx128_panther_top1_clip0.631_sub-02.png"},
+  {idx:"100",cat:"jelly bean",score:0.5373,gt:"idx100_jelly_bean_GT.png",recon:"idx100_jelly_bean_top1_clip0.743_sub-03.png"},
+  {idx:"071",cat:"elephant",score:0.5405,gt:"idx071_elephant_GT.png",recon:"idx071_elephant_top1_clip0.600_sub-02.png"},
+  {idx:"105",cat:"lamb",score:0.5617,gt:"idx105_lamb_GT.png",recon:"idx105_lamb_top1_clip0.729_sub-01.png"},
+  {idx:"038",cat:"cheetah",score:0.5676,gt:"idx038_cheetah_GT.png",recon:"idx038_cheetah_top1_clip0.679_sub-05.png"},
+  {idx:"149",cat:"rhinoceros",score:0.569,gt:"idx149_rhinoceros_GT.png",recon:"idx149_rhinoceros_top1_clip0.657_sub-02.png"},
+  {idx:"017",cat:"bok choy",score:0.5702,gt:"idx017_bok_choy_GT.png",recon:"idx017_bok_choy_top1_clip0.586_sub-10.png"},
+  {idx:"108",cat:"lettuce",score:0.571,gt:"idx108_lettuce_GT.png",recon:"idx108_lettuce_top1_clip0.706_sub-03.png"},
+  {idx:"086",cat:"gopher",score:0.574,gt:"idx086_gopher_GT.png",recon:"idx086_gopher_top1_clip0.776_sub-09.png"},
+  {idx:"141",cat:"possum",score:0.5759,gt:"idx141_possum_GT.png",recon:"idx141_possum_top1_clip0.742_sub-04.png"},
+  {idx:"156",cat:"sausage",score:0.5861,gt:"idx156_sausage_GT.png",recon:"idx156_sausage_top1_clip0.697_sub-03.png"},
+];
+
+const topSSIM = [
+  {idx:"025",cat:"bullet",score:0.5176,gt:"idx025_bullet_GT.png",recon:"idx025_bullet_top1_clip0.684_sub-03.png"},
+  {idx:"182",cat:"tick",score:0.4683,gt:"idx182_tick_GT.png",recon:"idx182_tick_top1_clip0.608_sub-08.png"},
+  {idx:"109",cat:"lightning bug",score:0.4665,gt:"idx109_lightning_bug_GT.png",recon:"idx109_lightning_bug_top1_clip0.662_sub-01.png"},
+  {idx:"081",cat:"garlic",score:0.4629,gt:"idx081_garlic_GT.png",recon:"idx081_garlic_top1_clip0.630_sub-02.png"},
+  {idx:"149",cat:"rhinoceros",score:0.4205,gt:"idx149_rhinoceros_GT.png",recon:"idx149_rhinoceros_top1_clip0.657_sub-02.png"},
+  {idx:"043",cat:"cleaver",score:0.4057,gt:"idx043_cleaver_GT.png",recon:"idx043_cleaver_top1_clip0.628_sub-04.png"},
+  {idx:"057",cat:"crow",score:0.3827,gt:"idx057_crow_GT.png",recon:"idx057_crow_top1_clip0.731_sub-01.png"},
+  {idx:"053",cat:"creme brulee",score:0.3748,gt:"idx053_creme_brulee_GT.png",recon:"idx053_creme_brulee_top1_clip0.669_sub-08.png"},
+  {idx:"001",cat:"antelope",score:0.2893,gt:"idx001_antelope_GT.png",recon:"idx001_antelope_top1_clip0.743_sub-09.png"},
+  {idx:"037",cat:"cheese",score:0.279,gt:"idx037_cheese_GT.png",recon:"idx037_cheese_top1_clip0.679_sub-10.png"},
+  {idx:"197",cat:"windshield",score:0.2648,gt:"idx197_windshield_GT.png",recon:"idx197_windshield_top1_clip0.479_sub-01.png"},
+  {idx:"092",cat:"handbrake",score:0.2636,gt:"idx092_handbrake_GT.png",recon:"idx092_handbrake_top1_clip0.572_sub-01.png"},
+  {idx:"010",cat:"batter",score:0.2558,gt:"idx010_batter_GT.png",recon:"idx010_batter_top1_clip0.679_sub-04.png"},
+  {idx:"110",cat:"manatee",score:0.2501,gt:"idx110_manatee_GT.png",recon:"idx110_manatee_top1_clip0.594_sub-01.png"},
+  {idx:"039",cat:"chest",score:0.2256,gt:"idx039_chest2_GT.png",recon:"idx039_chest2_top1_clip0.623_sub-10.png"},
+  {idx:"169",cat:"spatula",score:0.2212,gt:"idx169_spatula_GT.png",recon:"idx169_spatula_top1_clip0.671_sub-01.png"},
+  {idx:"151",cat:"rooster",score:0.2098,gt:"idx151_rooster_GT.png",recon:"idx151_rooster_top1_clip0.794_sub-01.png"},
+  {idx:"085",cat:"goose",score:0.2061,gt:"idx085_goose_GT.png",recon:"idx085_goose_top1_clip0.591_sub-03.png"},
+  {idx:"130",cat:"pear",score:0.206,gt:"idx130_pear_GT.png",recon:"idx130_pear_top1_clip0.693_sub-04.png"},
+  {idx:"160",cat:"seagull",score:0.1974,gt:"idx160_seagull_GT.png",recon:"idx160_seagull_top1_clip0.702_sub-04.png"},
+];
+
+function setupSection(data, navId, reconId, gtId, barId, valId, metricName, isDistance) {
+  const nav = document.getElementById(navId);
+  const reconImg = document.getElementById(reconId);
+  const gtImg = document.getElementById(gtId);
+  const bar = document.getElementById(barId);
+  const val = document.getElementById(valId);
+
+  function show(i) {
+    const s = data[i];
+    reconImg.src = `${REPO}/${s.recon}`;
+    gtImg.src = `${REPO}/${s.gt}`;
+    val.textContent = s.score.toFixed(4);
+
+    if (isDistance) {
+      // LPIPS: lower is better, so invert for bar (0.4 = good = wide bar)
+      const pct = Math.round((1 - s.score) * 100);
+      bar.style.width = pct + "%";
+      bar.style.background = s.score <= 0.5 ? "#2d8a4e" : s.score <= 0.6 ? "#b58a1b" : "#c0392b";
+    } else {
+      const pct = Math.round(s.score * 100);
+      bar.style.width = pct + "%";
+      bar.style.background = s.score >= 0.7 ? "#2d8a4e" : s.score >= 0.4 ? "#b58a1b" : "#c0392b";
+    }
+
+    nav.querySelectorAll(".sample-btn").forEach((b, j) => b.classList.toggle("active", j === i));
+  }
+
+  data.forEach((s, i) => {
+    const btn = document.createElement("button");
+    btn.className = "sample-btn";
+    btn.textContent = s.cat;
+    btn.onclick = () => show(i);
+    nav.appendChild(btn);
+  });
+
+  show(0);
+}
+
+setupSection(topCLIP, "navCLIP", "reconCLIP", "gtCLIP", "barCLIP", "valCLIP", "CLIP", false);
+setupSection(topLPIPS, "navLPIPS", "reconLPIPS", "gtLPIPS", "barLPIPS", "valLPIPS", "LPIPS", true);
+setupSection(topSSIM, "navSSIM", "reconSSIM", "gtSSIM", "barSSIM", "valSSIM", "SSIM", false);
+</script>
+</body>
+</html>
