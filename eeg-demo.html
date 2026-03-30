@@ -78,7 +78,7 @@
 
     <section class="project-body">
       <div class="eeg-intro">
-        <p>This project reconstructs images from EEG brain signals. A subject views an image while wearing an EEG cap, and a two-pathway neural network decodes the brain activity into a visual reconstruction &mdash; all from less than 500ms of signal.</p>
+        <p>This project reconstructs images from EEG brain signals. A subject views an image while wearing an EEG cap, and a two-pathway neural network decodes the brain activity into a visual reconstruction, all from less than a second of signal. Built on the <a href="https://www.sciencedirect.com/science/article/pii/S1053811922008758">THINGS-EEG2</a> dataset.</p>
       </div>
 
       <h2>How it works</h2>
@@ -95,9 +95,9 @@
         <span class="pipeline-node">Reconstruction</span>
       </div>
       <ol>
-        <li><strong>EEG Recording</strong> &mdash; Brain activity is captured from 63 electrodes across the scalp using a BrainVision actiCHamp system.</li>
-        <li><strong>Semantic Pathway</strong> &mdash; Maps EEG embeddings into CLIP embedding space, capturing high-level meaning (what the object is).</li>
-        <li><strong>Diffusion Prior</strong> &mdash; Translates the predicted embeddings into image space via Stable Diffusion, producing the final reconstruction.</li>
+        <li><strong>EEG Recording:</strong> Brain activity is captured from 63 electrodes across the scalp using a BrainVision actiCHamp device.</li>
+        <li><strong>Semantic Pathway:</strong> Maps EEG embeddings into CLIP embedding space, capturing high-level meaning (what the object is).</li>
+        <li><strong>Diffusion Prior:</strong> Translates the predicted embeddings into image space via Stable Diffusion, producing the final reconstruction.</li>
       </ol>
 
       <h2>Results</h2>
@@ -105,7 +105,7 @@
         <div class="stat-card"><div class="stat-number">0.49</div><div class="stat-desc">Avg. CLIP similarity</div></div>
         <div class="stat-card"><div class="stat-number">0.75</div><div class="stat-desc">Best score</div></div>
         <div class="stat-card"><div class="stat-number">200</div><div class="stat-desc">Test images</div></div>
-        <div class="stat-card"><div class="stat-number">&lt;500ms</div><div class="stat-desc">Signal window</div></div>
+        <div class="stat-card"><div class="stat-number">&lt;1s</div><div class="stat-desc">Signal window</div></div>
       </div>
 
       <h2>Demo</h2>
