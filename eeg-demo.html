@@ -265,17 +265,19 @@
     samples.forEach((s,i)=>{const btn=document.createElement("button");btn.className="sample-btn";btn.textContent=s.cat;btn.onclick=()=>showSample(i);nav.appendChild(btn);});
 
     function showSample(index){
-      currentSample=index; playbackStart=0; // restart playback
+      currentSample=index; playbackStart=0;
       const s=samples[index];
       document.getElementById("recon").src=`${REPO}/${s.reconFile}`;
       document.getElementById("gt").src=`${REPO}/${s.gtFile}`;
       document.getElementById("scoreValue").textContent=s.score.toFixed(3);
       const bar=document.getElementById("scoreBar");bar.style.width=Math.round(s.score*100)+"%";bar.style.background=scoreColor(s.score);
       document.querySelectorAll(".sample-btn").forEach((b,i)=>b.classList.toggle("active",i===index));
+      // Update explorer label with sample name
+      const el=document.getElementById("explorerLabel");
+      if(el){const eCh=ALL_CH.find(c=>c.n===activeElectrode);el.innerHTML=`${activeElectrode} &mdash; ${eCh?eCh.r:''} &mdash; <em>${s.cat}</em>`;}
       // Flash explorer card
       const card=document.querySelector(".explorer-card");
-      card.classList.add("flash");
-      setTimeout(()=>card.classList.remove("flash"),300);
+      if(card){card.classList.add("flash");setTimeout(()=>card.classList.remove("flash"),300);}
     }
     showSample(0);
 
@@ -308,7 +310,7 @@
       dot.addEventListener("mouseenter",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","5.5");dot.setAttribute("opacity","0.85");}});
       dot.addEventListener("mouseleave",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","4");dot.setAttribute("opacity","0.5");}});
       dot.addEventListener("click",()=>{
-        activeElectrode=ch.n;expLabel.innerHTML=`${ch.n} &mdash; ${ch.r}`;
+        activeElectrode=ch.n;const s=samples[currentSample];expLabel.innerHTML=`${ch.n} &mdash; ${ch.r} &mdash; <em>${s.cat}</em>`;
         svg.querySelectorAll('.electrode-dot').forEach(d=>{const a=d.dataset.name===ch.n;d.setAttribute("r",a?6:4);d.setAttribute("opacity",a?"1":"0.5");});
       });
       svg.appendChild(dot);
