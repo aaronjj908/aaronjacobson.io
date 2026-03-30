@@ -77,50 +77,9 @@
     <hr>
 
     <section class="project-body">
-      <div class="eeg-intro">
-        <p>This project reconstructs images from EEG brain signals. A subject views an image while wearing an EEG cap, and a two-pathway neural network decodes the brain activity into a visual reconstruction, all from less than a second of signal. Built on the <a href="https://www.sciencedirect.com/science/article/pii/S1053811922008758">THINGS-EEG2</a> dataset.</p>
-      </div>
-
-      <h2>How it works</h2>
-      <p>The system uses two complementary pathways to go from raw EEG to an image:</p>
-      <div class="pipeline-diagram">
-        <span class="pipeline-node">EEG Signal</span>
-        <span class="pipeline-arrow">&rarr;</span>
-        <span class="pipeline-node">Visual Cortex Channels</span>
-        <span class="pipeline-arrow">&rarr;</span>
-        <span class="pipeline-node">Semantic Pathway</span>
-        <span class="pipeline-arrow">&rarr;</span>
-        <span class="pipeline-node">Diffusion Prior</span>
-        <span class="pipeline-arrow">&rarr;</span>
-        <span class="pipeline-node">Reconstruction</span>
-      </div>
-      <ol>
-        <li><strong>EEG Recording:</strong> Brain activity is captured from 63 electrodes across the scalp using a BrainVision actiCHamp device.</li>
-        <li><strong>Semantic Pathway:</strong> Maps EEG embeddings into CLIP embedding space, capturing high-level meaning (what the object is).</li>
-        <li><strong>Diffusion Prior:</strong> Translates the predicted embeddings into image space via Stable Diffusion, producing the final reconstruction.</li>
-      </ol>
-
-      <h2>Results</h2>
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-number">0.66</div><div class="stat-desc">Avg. CLIP similarity</div></div>
-        <div class="stat-card"><div class="stat-number">0.80</div><div class="stat-desc">Best score</div></div>
-        <div class="stat-card"><div class="stat-number">50</div><div class="stat-desc">Test images</div></div>
-        <div class="stat-card"><div class="stat-number">&lt;1s</div><div class="stat-desc">Signal window</div></div>
-      </div>
-
-      <h2>Demo</h2>
-      <p>
-        Select a sample to watch the visual cortex respond in real time.
-        The waveform shows 8 electrodes over the back of the head, where
-        the brain processes vision. Two moments are marked:
+      <p class="project-subtitle" style="margin-bottom:1.5rem">
+        Reconstructing images from EEG brain signals, all from less than a second of neural activity.
       </p>
-      <ul>
-        <li><strong>P100</strong> (~100ms) &mdash; The first major response.
-          The brain detects basic visual features: edges, contrast, spatial layout.</li>
-        <li><strong>N170</strong> (~170ms) &mdash; The brain recognizes
-          <em>what</em> the object is. This is the signal the model relies on most
-          for reconstruction.</li>
-      </ul>
 
       <div class="sample-nav" id="sampleNav"></div>
 
@@ -169,6 +128,48 @@
           </div>
         </div>
       </div>
+
+      <hr>
+
+      <h2>About this project</h2>
+      <p>
+        A subject views an image while wearing a 63-channel EEG cap, and a
+        two-pathway neural network decodes the brain activity into a visual
+        reconstruction. Built on the
+        <a href="https://www.sciencedirect.com/science/article/pii/S1053811922008758">THINGS-EEG2</a> dataset.
+      </p>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-number">0.66</div><div class="stat-desc">Avg. CLIP similarity</div></div>
+        <div class="stat-card"><div class="stat-number">0.80</div><div class="stat-desc">Best score</div></div>
+        <div class="stat-card"><div class="stat-number">50</div><div class="stat-desc">Test images</div></div>
+        <div class="stat-card"><div class="stat-number">&lt;1s</div><div class="stat-desc">Signal window</div></div>
+      </div>
+
+      <h2>How it works</h2>
+      <p>The system uses two complementary pathways to go from raw EEG to an image:</p>
+      <div class="pipeline-diagram">
+        <span class="pipeline-node">EEG Signal</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-node">Visual Cortex Channels</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-node">Semantic Pathway</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-node">Diffusion Prior</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-node">Reconstruction</span>
+      </div>
+      <ol>
+        <li><strong>EEG Recording:</strong> Brain activity is captured from 63 electrodes across the scalp using a BrainVision actiCHamp device.</li>
+        <li><strong>Semantic Pathway:</strong> Maps EEG embeddings into CLIP embedding space, capturing high-level meaning (what the object is).</li>
+        <li><strong>Diffusion Prior:</strong> Translates the predicted embeddings into image space via Stable Diffusion, producing the final reconstruction.</li>
+      </ol>
+
+      <p>
+        The visual cortex waveform in the demo shows two notable moments:
+        <strong>P100</strong> (~100ms), when the brain detects basic visual features,
+        and <strong>N170</strong> (~170ms), when it recognizes what the object is.
+      </p>
 
     </section>
   </main>
