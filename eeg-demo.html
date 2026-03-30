@@ -308,7 +308,7 @@
       dot.addEventListener("mouseenter",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","5.5");dot.setAttribute("opacity","0.85");}});
       dot.addEventListener("mouseleave",()=>{if(ch.n!==activeElectrode){dot.setAttribute("r","4");dot.setAttribute("opacity","0.5");}});
       dot.addEventListener("click",()=>{
-        activeElectrode=ch.n;syncExplorerLabel();
+        activeElectrode=ch.n;expLabel.innerHTML=`${ch.n} &mdash; ${ch.r}`;
         svg.querySelectorAll('.electrode-dot').forEach(d=>{const a=d.dataset.name===ch.n;d.setAttribute("r",a?6:4);d.setAttribute("opacity",a?"1":"0.5");});
       });
       svg.appendChild(dot);
@@ -381,17 +381,6 @@
 
       requestAnimationFrame(draw);
     }
-
-    // Keep explorer label in sync with current sample
-    function syncExplorerLabel(){
-      const s=samples[currentSample];
-      const eCh=ALL_CH.find(c=>c.n===activeElectrode);
-      expLabel.innerHTML=`${activeElectrode} &mdash; ${eCh?eCh.r:''} &mdash; <em>${s.cat}</em>`;
-    }
-    // Patch showSample to also update explorer label
-    const _origShow=showSample;
-    showSample=function(index){_origShow(index);syncExplorerLabel();};
-    syncExplorerLabel(); // set initial label
 
     // Load real EEG data then start rendering
     fetch("https://raw.githubusercontent.com/aaronjj908/eeg-demo/main/eeg_data.json")
