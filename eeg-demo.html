@@ -49,9 +49,7 @@
     .legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; color: #888; }
     .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     .explorer-wave { background: #1a1a2e; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; justify-content: center; }
-    .explorer-wave-label { color: rgba(255,255,255,0.5); font-family: "DM Sans", system-ui, sans-serif; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: baseline; }
-    .explorer-wave-label .electrode-info { }
-    .explorer-wave-label .sample-info { font-size: 0.7rem; color: rgba(255,255,255,0.25); font-style: italic; }
+    .explorer-wave-label { color: rgba(255,255,255,0.5); font-family: "DM Sans", system-ui, sans-serif; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.75rem; }
     .explorer-wave-sub { color: rgba(255,255,255,0.2); font-size: 0.7rem; margin-top: 0.5rem; }
     .electrode-dot { cursor: pointer; transition: all 0.15s; }
     .electrode-label-svg { font-family: "DM Sans", system-ui, sans-serif; font-size: 6px; fill: #bbb; pointer-events: none; text-anchor: middle; }
@@ -388,7 +386,7 @@
     function syncExplorerLabel(){
       const s=samples[currentSample];
       const eCh=ALL_CH.find(c=>c.n===activeElectrode);
-      expLabel.innerHTML=`<span class="electrode-info">${activeElectrode} &mdash; ${eCh?eCh.r:''}</span><span class="sample-info">${s.cat}</span>`;
+      expLabel.innerHTML=`${activeElectrode} &mdash; ${eCh?eCh.r:''} &mdash; <em>${s.cat}</em>`;
     }
     // Patch showSample to also update explorer label
     const _origShow=showSample;
